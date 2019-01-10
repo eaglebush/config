@@ -9,6 +9,7 @@ import (
 type Configuration struct {
 	HostPort         int
 	ConnectionString string
+	DriverName       string
 }
 
 // LoadConfig - load configuration file and return a configuration
