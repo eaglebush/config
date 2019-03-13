@@ -54,6 +54,7 @@ type NotificationInfo struct {
 //Configuration - for various configuration settings. This struct can be modified depending on the requirement.
 type Configuration struct {
 	ApplicationID     string
+	APIKey            string
 	CookieDomain      string
 	HostPort          int
 	HMAC              string
