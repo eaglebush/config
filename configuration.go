@@ -41,6 +41,7 @@ type DatabaseInfo struct {
 	StorageType       string //StorageType: FILE for filebased database such as Access, SQlite or LocalDB. SERVER for SQL Server, MySQL etc
 	GroupID           string `json:"GroupID,omitempty"` //GroupID allows us to get groups of connection
 	SequenceGenerator SequenceGeneratorInfo
+	UTCDateFunction   string // The UTC date function of each SQL database driver
 }
 
 //NotificationInfo - notification configuration setting
