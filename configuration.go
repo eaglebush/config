@@ -39,9 +39,14 @@ type DatabaseInfo struct {
 	ConnectionString  string //ConnectionString specific to the database
 	DriverName        string //DriverName needs to be specified depending on the driver id used by the Go database driver
 	StorageType       string //StorageType: FILE for filebased database such as Access, SQlite or LocalDB. SERVER for SQL Server, MySQL etc
-	GroupID           string `json:"GroupID,omitempty"` //GroupID allows us to get groups of connection
+	GroupID           string //GroupID allows us to get groups of connection
 	SequenceGenerator SequenceGeneratorInfo
+	DateFunction      string // The date function of each SQL database driver
 	UTCDateFunction   string // The UTC date function of each SQL database driver
+	MaxOpenConnection int // Maximum open connection
+	MaxIdleConnection int // Maximum idle connection
+	MaxConnectionLifetime int // Max connection lifetime
+	Ping bool			// Ping connection
 }
 
 //NotificationInfo - notification configuration setting
