@@ -22,7 +22,8 @@
                 "NamePlaceHolder": "{SequenceName}"
             },
              "KeywordMap": [
-                 {"Key": "SAVEPOINT", "Equivalent": "SAVE TRANSACTION"}
+                 {"Key": "SAVEPOINT_START", "Equivalent": "SAVE TRANSACTION"}
+                 {"Key": "SAVEPOINT_RELEASE", "Equivalent": "ROLLBACK TRANSACTION"}
             ] 
         } 
     ],   
