@@ -6,6 +6,12 @@ import (
 	"log"
 )
 
+// DatabaseKeyword - struct for database keywords
+type DatabaseKeyword struct {
+	Key        string
+	Equivalent string
+}
+
 //DomainInfo - domain information for LDAP authentication
 type DomainInfo struct {
 	Name               string
@@ -35,18 +41,19 @@ type MailServer struct {
 
 //DatabaseInfo - database configuration setting
 type DatabaseInfo struct {
-	ID                string //A unique ID that will identify the connection to a database
-	ConnectionString  string //ConnectionString specific to the database
-	DriverName        string //DriverName needs to be specified depending on the driver id used by the Go database driver
-	StorageType       string //StorageType: FILE for filebased database such as Access, SQlite or LocalDB. SERVER for SQL Server, MySQL etc
-	GroupID           string //GroupID allows us to get groups of connection
-	SequenceGenerator SequenceGeneratorInfo
-	DateFunction      string // The date function of each SQL database driver
-	UTCDateFunction   string // The UTC date function of each SQL database driver
-	MaxOpenConnection int // Maximum open connection
-	MaxIdleConnection int // Maximum idle connection
-	MaxConnectionLifetime int // Max connection lifetime
-	Ping bool			// Ping connection
+	ID                    string //A unique ID that will identify the connection to a database
+	ConnectionString      string //ConnectionString specific to the database
+	DriverName            string //DriverName needs to be specified depending on the driver id used by the Go database driver
+	StorageType           string //StorageType: FILE for filebased database such as Access, SQlite or LocalDB. SERVER for SQL Server, MySQL etc
+	GroupID               string //GroupID allows us to get groups of connection
+	SequenceGenerator     SequenceGeneratorInfo
+	DateFunction          string            // The date function of each SQL database driver
+	UTCDateFunction       string            // The UTC date function of each SQL database driver
+	MaxOpenConnection     int               // Maximum open connection
+	MaxIdleConnection     int               // Maximum idle connection
+	MaxConnectionLifetime int               // Max connection lifetime
+	Ping                  bool              // Ping connection
+	KeywordMap            []DatabaseKeyword // various keyword equivalents
 }
 
 //NotificationInfo - notification configuration setting
