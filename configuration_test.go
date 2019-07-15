@@ -10,5 +10,7 @@ func TestLoadConfig(t *testing.T) {
 
 	v := config.GetDatabaseInfo("DEFAULT").KeywordMap[0]
 	fmt.Println(v.Key)
-	fmt.Println(v.Equivalent)
+	fmt.Println(v.Value)
+	vi := config.Flag("Joan").String()
+	fmt.Println(vi)
 }

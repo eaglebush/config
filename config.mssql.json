@@ -22,8 +22,8 @@
                 "NamePlaceHolder": "{SequenceName}"
             },
              "KeywordMap": [
-                 {"Key": "SAVEPOINT_START", "Equivalent": "SAVE TRANSACTION"}
-                 {"Key": "SAVEPOINT_RELEASE", "Equivalent": "ROLLBACK TRANSACTION"}
+                 {"Key": "SAVEPOINT_START", "Value": "SAVE TRANSACTION"},
+                 {"Key": "SAVEPOINT_RELEASE", "Value": "ROLLBACK TRANSACTION"}
             ] 
         } 
     ],   
@@ -45,5 +45,8 @@
             "EmailAddress":"testuser@yahoo.com",
             "MessengerName" : "test"
         }        
+    ],
+    "Flags" : [
+        {"Key": "Joan", "Value":"Mosqueda"}
     ]
 }
