@@ -16,5 +16,5 @@ func TestLoadConfig(t *testing.T) {
 	vi := config.Flag("Joan").String()
 	fmt.Println(vi)
 
-	fmt.Println(`Parameter PlaceHolder: `, v.ParameterPlaceHolder)
+	fmt.Println(`Parameter PlaceHolder: `, v.ParameterPlaceholder)
 }
