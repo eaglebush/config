@@ -53,6 +53,7 @@ type DatabaseInfo struct {
 	DriverName            string //DriverName needs to be specified depending on the driver id used by the Go database driver
 	StorageType           string //FILE for filebased database such as Access, SQlite or LocalDB. SERVER for SQL Server, MySQL etc
 	ParameterPlaceHolder  string //Parameter place holder for prepared statements. Default is '?'
+	ParameterInSequence   bool   //Parameter place holder is in sequence. Default is false
 	GroupID               string //GroupID allows us to get groups of connection
 	SequenceGenerator     SequenceGeneratorInfo
 	DateFunction          string            // The date function of each SQL database driver
