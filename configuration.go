@@ -51,7 +51,8 @@ type DatabaseInfo struct {
 	ID                    string //A unique ID that will identify the connection to a database
 	ConnectionString      string //ConnectionString specific to the database
 	DriverName            string //DriverName needs to be specified depending on the driver id used by the Go database driver
-	StorageType           string //StorageType: FILE for filebased database such as Access, SQlite or LocalDB. SERVER for SQL Server, MySQL etc
+	StorageType           string //FILE for filebased database such as Access, SQlite or LocalDB. SERVER for SQL Server, MySQL etc
+	ParameterPlaceHolder  string //Parameter place holder for prepared statements. Default is '?'
 	GroupID               string //GroupID allows us to get groups of connection
 	SequenceGenerator     SequenceGeneratorInfo
 	DateFunction          string            // The date function of each SQL database driver
@@ -105,6 +106,16 @@ func LoadConfig(fileName string) (*Configuration, error) {
 	*/
 	if err != nil {
 		return nil, err
+	}
+
+	for i := range config.Databases {
+		if config.Databases[i].ParameterPlaceHolder == "" {
+			config.Databases[i].ParameterPlaceHolder = "?"
+		}
+
+		if config.Databases[i].StorageType == "" {
+			config.Databases[i].StorageType = "SERVER"
+		}
 	}
 
 	return config, nil
