@@ -79,13 +79,13 @@ type Configuration struct {
 	APIKey            string
 	CookieDomain      string
 	HostPort          int
-	HMAC              string
+	HMAC              string             `json:"HMAC,omitempty"`
 	MailServer        MailServer         `json:"MailServer,omitempty"`
 	DefaultDatabaseID string             `json:"DefaultDatabaseID,omitempty"`
 	Databases         []DatabaseInfo     `json:"Databases,omitempty"`
 	Domains           []DomainInfo       `json:"Domains,omitempty"`
 	NotifyRecipients  []NotificationInfo `json:"NotifyRecipients,omitempty"`
-	Flags             []Flag
+	Flags             []Flag             `json:"Flags,omitempty"`
 }
 
 // LoadConfig - load configuration file and return a configuration
