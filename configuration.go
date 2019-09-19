@@ -48,21 +48,22 @@ type MailServer struct {
 
 //DatabaseInfo - database configuration setting
 type DatabaseInfo struct {
-	ID                    string //A unique ID that will identify the connection to a database
-	ConnectionString      string //ConnectionString specific to the database
-	DriverName            string //DriverName needs to be specified depending on the driver id used by the Go database driver
-	StorageType           string //FILE for filebased database such as Access, SQlite or LocalDB. SERVER for SQL Server, MySQL etc
-	ParameterPlaceholder  string //Parameter place holder for prepared statements. Default is '?'
-	ParameterInSequence   bool   //Parameter place holder is in sequence. Default is false
-	GroupID               string //GroupID allows us to get groups of connection
-	SequenceGenerator     SequenceGeneratorInfo
-	DateFunction          string            // The date function of each SQL database driver
-	UTCDateFunction       string            // The UTC date function of each SQL database driver
-	MaxOpenConnection     int               // Maximum open connection
-	MaxIdleConnection     int               // Maximum idle connection
-	MaxConnectionLifetime int               // Max connection lifetime
-	Ping                  bool              // Ping connection
-	KeywordMap            []DatabaseKeyword // various keyword equivalents
+	ID                    string                // A unique ID that will identify the connection to a database
+	ConnectionString      string                // ConnectionString specific to the database
+	DriverName            string                // DriverName needs to be specified depending on the driver id used by the Go database driver
+	StorageType           string                // FILE for filebased database such as Access, SQlite or LocalDB. SERVER for SQL Server, MySQL etc
+	ParameterPlaceholder  string                // Parameter place holder for prepared statements. Default is '?'
+	ParameterInSequence   bool                  // Parameter place holder is in sequence. Default is false
+	GroupID               string                // GroupID allows us to get groups of connection
+	SequenceGenerator     SequenceGeneratorInfo // Sequence generator configuration
+	IdentityQuery         string                // A query to get the generated identity
+	DateFunction          string                // The date function of each SQL database driver
+	UTCDateFunction       string                // The UTC date function of each SQL database driver
+	MaxOpenConnection     int                   // Maximum open connection
+	MaxIdleConnection     int                   // Maximum idle connection
+	MaxConnectionLifetime int                   // Max connection lifetime
+	Ping                  bool                  // Ping connection
+	KeywordMap            []DatabaseKeyword     // various keyword equivalents
 }
 
 //NotificationInfo - notification configuration setting
@@ -116,6 +117,11 @@ func LoadConfig(fileName string) (*Configuration, error) {
 
 		if config.Databases[i].StorageType == "" {
 			config.Databases[i].StorageType = "SERVER"
+		}
+
+		drivern := strings.ToLower(config.Databases[i].DriverName)
+		if config.Databases[i].StorageType == "SERVER" && (drivern == "sqlserver" || drivern == "mssql") {
+			config.Databases[i].IdentityQuery = "SELECT SCOPE_IDENTITY();"
 		}
 	}
 
