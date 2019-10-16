@@ -77,12 +77,14 @@ type NotificationInfo struct {
 //Configuration - for various configuration settings. This struct can be modified depending on the requirement.
 type Configuration struct {
 	ApplicationID     string
+	ApplicationTheme  string
 	APIKey            string
 	CookieDomain      string
+	DefaultDatabaseID string `json:"DefaultDatabaseID,omitempty"`
 	HostPort          int
-	HMAC              string             `json:"HMAC,omitempty"`
+	HMAC              string `json:"HMAC,omitempty"`
+	LicenseSerial     string
 	MailServer        MailServer         `json:"MailServer,omitempty"`
-	DefaultDatabaseID string             `json:"DefaultDatabaseID,omitempty"`
 	Databases         []DatabaseInfo     `json:"Databases,omitempty"`
 	Domains           []DomainInfo       `json:"Domains,omitempty"`
 	NotifyRecipients  []NotificationInfo `json:"NotifyRecipients,omitempty"`
