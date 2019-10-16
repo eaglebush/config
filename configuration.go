@@ -76,14 +76,14 @@ type NotificationInfo struct {
 
 //Configuration - for various configuration settings. This struct can be modified depending on the requirement.
 type Configuration struct {
-	ApplicationID     string
-	ApplicationTheme  string
-	APIKey            string
-	CookieDomain      string
-	DefaultDatabaseID string `json:"DefaultDatabaseID,omitempty"`
-	HostPort          int
-	HMAC              string `json:"HMAC,omitempty"`
-	LicenseSerial     string
+	ApplicationID     string             `json:"ApplicationID,omitempty"`
+	ApplicationTheme  string             `json:"ApplicationTheme,omitempty"`
+	APIKey            string             `json:"APIKey,omitempty"`
+	CookieDomain      string             `json:"CookieDomain,omitempty"`
+	DefaultDatabaseID string             `json:"DefaultDatabaseID,omitempty"`
+	HostPort          int                `json:"HostPort,omitempty"`
+	HMAC              string             `json:"HMAC,omitempty"`
+	LicenseSerial     string             `json:"LicenseSerial,omitempty"`
 	MailServer        MailServer         `json:"MailServer,omitempty"`
 	Databases         []DatabaseInfo     `json:"Databases,omitempty"`
 	Domains           []DomainInfo       `json:"Domains,omitempty"`
@@ -104,10 +104,7 @@ func LoadConfig(fileName string) (*Configuration, error) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	/*
-		decoder := json.NewDecoder(file)
-		err = decoder.Decode(&config)
-	*/
+
 	if err != nil {
 		return nil, err
 	}
