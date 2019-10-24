@@ -79,6 +79,7 @@ type NotificationRecipient struct {
 //Configuration - for various configuration settings. This struct can be modified depending on the requirement.
 type Configuration struct {
 	ApplicationID     string             `json:"ApplicationID,omitempty"`
+	ApplicationName   string             `json:"ApplicationName,omitempty"`
 	ApplicationTheme  string             `json:"ApplicationTheme,omitempty"`
 	APIKey            string             `json:"APIKey,omitempty"`
 	CookieDomain      string             `json:"CookieDomain,omitempty"`
