@@ -1,14 +1,7 @@
 {
     "HostPort" : 8000,
     "HMAC": "thisisanhmacsecretkey",
-    "DefaultDatabaseID": "DEFAULT",
-    "MailServer" : {
-        "Host": "192.168.1.20",
-        "Port" : 25,
-        "User" : "",
-        "Password" : "",
-        "SenderName": "AppsHub"
-    },
+    "DefaultDatabaseID": "DEFAULT",    
     "Databases" : [
         {
             "ID" : "DEFAULT",
@@ -38,14 +31,19 @@
             "Filter": "(objectClass=person)"
         }
     ],
-    "NotifyRecipients": [
-        {
-            "ID":"test",
-            "FullName":"Test User",
-            "EmailAddress":"testuser@yahoo.com",
-            "MessengerName" : "test"
-        }        
-    ],
+    "Notifications" : {
+        "EndpointURL": "http://hulk.vdumdci.com.ph/notify/api/",
+        "Login" : "",
+        "Password" : "",
+        "Recipients": [
+            {
+                "ID":"test",
+                "ContactName":"Test User",
+                "ContactAddress":"testuser@yahoo.com"
+            }        
+        ]
+    },
+    
     "Flags" : [
         {"Key": "Joan", "Value":"Mosqueda"}
     ]

@@ -19,6 +19,14 @@ type DatabaseKeyword struct {
 	Flag
 }
 
+// NotificationInfo - notification information on connecting to Notify API
+type NotificationInfo struct {
+	Endpoint   string
+	Login      string
+	Password   string
+	Recipients []NotificationRecipient
+}
+
 //DomainInfo - domain information for LDAP authentication
 type DomainInfo struct {
 	Name               string
@@ -35,15 +43,6 @@ type SequenceGeneratorInfo struct {
 	UpsertQuery     string
 	ResultQuery     string
 	NamePlaceHolder string
-}
-
-//MailServer - mail server setting
-type MailServer struct {
-	Host       string
-	Port       int
-	User       string
-	Password   string
-	SenderName string
 }
 
 //DatabaseInfo - database configuration setting
@@ -66,12 +65,11 @@ type DatabaseInfo struct {
 	KeywordMap            []DatabaseKeyword     // various keyword equivalents
 }
 
-//NotificationInfo - notification configuration setting
-type NotificationInfo struct {
-	ID            string
-	FullName      string
-	EmailAddress  string
-	MessengerName string
+//NotificationRecipient - notification standard receipients
+type NotificationRecipient struct {
+	ID             string
+	ContactName    string
+	ContactAddress string
 }
 
 //Configuration - for various configuration settings. This struct can be modified depending on the requirement.
@@ -84,10 +82,9 @@ type Configuration struct {
 	HostPort          int                `json:"HostPort,omitempty"`
 	HMAC              string             `json:"HMAC,omitempty"`
 	LicenseSerial     string             `json:"LicenseSerial,omitempty"`
-	MailServer        MailServer         `json:"MailServer,omitempty"`
 	Databases         []DatabaseInfo     `json:"Databases,omitempty"`
 	Domains           []DomainInfo       `json:"Domains,omitempty"`
-	NotifyRecipients  []NotificationInfo `json:"NotifyRecipients,omitempty"`
+	Notifications     []NotificationInfo `json:"Notifications,omitempty"`
 	Flags             []Flag             `json:"Flags,omitempty"`
 }
 
