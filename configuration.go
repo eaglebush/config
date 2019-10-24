@@ -158,17 +158,6 @@ func (c *Configuration) GetDomainInfo(DomainName string) *DomainInfo {
 	return nil
 }
 
-//GetNotifyRecipient - get a notification recipient info by name
-func (c *Configuration) GetNotifyRecipient(RecipientID string) *NotificationInfo {
-	for _, v := range c.NotifyRecipients {
-		if v.ID == RecipientID {
-			return &v
-		}
-	}
-
-	return nil
-}
-
 //Flag - get a flag value
 func (c *Configuration) Flag(key string) Flag {
 	k := strings.ToLower(key)
