@@ -33,8 +33,9 @@
     ],
     "Notifications" : {
         "Endpoint": "http://hulk.vdumdci.com.ph/notify/api/",
+        "Type": "EMAIL",
         "Login" : "",
-        "Password" : "",
+        "Password" : "",        
         "Active": true,
         "SenderAddress": "info@mail.com",
         "SenderName": "Administrator",

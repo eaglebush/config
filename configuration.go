@@ -22,6 +22,7 @@ type DatabaseKeyword struct {
 // NotificationInfo - notification information on connecting to Notify API
 type NotificationInfo struct {
 	Endpoint      string
+	Type          string
 	Login         string
 	Password      string
 	Active        bool
@@ -68,7 +69,7 @@ type DatabaseInfo struct {
 	KeywordMap            []DatabaseKeyword     // various keyword equivalents
 }
 
-//NotificationRecipient - notification standard receipients
+//NotificationRecipient - notification standard recipients
 type NotificationRecipient struct {
 	ID             string
 	ContactName    string
