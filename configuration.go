@@ -21,10 +21,13 @@ type DatabaseKeyword struct {
 
 // NotificationInfo - notification information on connecting to Notify API
 type NotificationInfo struct {
-	Endpoint   string
-	Login      string
-	Password   string
-	Recipients []NotificationRecipient
+	Endpoint      string
+	Login         string
+	Password      string
+	Active        bool
+	SenderAddress string
+	SenderName    string
+	Recipients    []NotificationRecipient
 }
 
 //DomainInfo - domain information for LDAP authentication

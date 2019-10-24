@@ -32,15 +32,18 @@
         }
     ],
     "Notifications" : {
-        "EndpointURL": "http://hulk.vdumdci.com.ph/notify/api/",
+        "Endpoint": "http://hulk.vdumdci.com.ph/notify/api/",
         "Login" : "",
         "Password" : "",
+        "Active": true,
+        "SenderAddress": "info@mail.com",
+        "SenderName": "Administrator",
         "Recipients": [
             {
                 "ID":"test",
                 "ContactName":"Test User",
                 "ContactAddress":"testuser@yahoo.com"
-            }        
+            }
         ]
     },
     
