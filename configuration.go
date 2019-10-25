@@ -21,7 +21,8 @@ type DatabaseKeyword struct {
 
 // NotificationInfo - notification information on connecting to Notify API
 type NotificationInfo struct {
-	Endpoint      string
+	APIHost       string
+	APIPath       string
 	Type          string
 	Login         string
 	Password      string

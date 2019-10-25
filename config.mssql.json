@@ -33,7 +33,8 @@
         }
     ],
     "Notifications" : {
-        "Endpoint": "http://hulk.vdumdci.com.ph/notify/api/",
+        "APIHost": "http://hulk.vdimdci.com.ph",
+        "APIPath": "/api/notify/email/",
         "Type": "EMAIL",
         "Login" : "",
         "Password" : "",        
