@@ -84,6 +84,7 @@ type Configuration struct {
 	APIKey            string             `json:"APIKey,omitempty"`
 	CookieDomain      string             `json:"CookieDomain,omitempty"`
 	DefaultDatabaseID string             `json:"DefaultDatabaseID,omitempty"`
+	HostExternalURL   string             `json:"HostExternalURL,omitempty"`
 	HostPort          int                `json:"HostPort,omitempty"`
 	HMAC              string             `json:"HMAC,omitempty"`
 	LicenseSerial     string             `json:"LicenseSerial,omitempty"`

@@ -1,4 +1,5 @@
 {
+    "HostExternalURL": "",
     "HostPort" : 8000,
     "HMAC": "thisisanhmacsecretkey",
     "DefaultDatabaseID": "DEFAULT",    
