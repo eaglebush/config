@@ -19,6 +19,12 @@ type DatabaseKeyword struct {
 	Flag
 }
 
+// Endpoint - endpoint struct
+type Endpoint struct {
+	ID      string
+	Address string
+}
+
 // NotificationInfo - notification information on connecting to Notify API
 type NotificationInfo struct {
 	APIHost       string
@@ -79,12 +85,15 @@ type NotificationRecipient struct {
 
 //Configuration - for various configuration settings. This struct can be modified depending on the requirement.
 type Configuration struct {
+	APIEndpoints      []Endpoint         `json:"APIEndpoints,omitempty"`
+	APIKey            string             `json:"APIKey,omitempty"`
 	ApplicationID     string             `json:"ApplicationID,omitempty"`
 	ApplicationName   string             `json:"ApplicationName,omitempty"`
 	ApplicationTheme  string             `json:"ApplicationTheme,omitempty"`
-	APIKey            string             `json:"APIKey,omitempty"`
 	CookieDomain      string             `json:"CookieDomain,omitempty"`
 	DefaultDatabaseID string             `json:"DefaultDatabaseID,omitempty"`
+	DefaultEndpointID string             `json:"DefaultEndpointID,omitempty"`
+	HostInternalURL   string             `json:"HostInternalURL,omitempty"`
 	HostExternalURL   string             `json:"HostExternalURL,omitempty"`
 	HostPort          int                `json:"HostPort,omitempty"`
 	HMAC              string             `json:"HMAC,omitempty"`
@@ -163,6 +172,28 @@ func (c *Configuration) GetDomainInfo(DomainName string) *DomainInfo {
 	}
 
 	return nil
+}
+
+//GetEndpoint - get an endpoint value
+func (c *Configuration) GetEndpoint(id string) string {
+	k := strings.ToLower(id)
+
+	if k == "" {
+		k = strings.ToLower(c.DefaultEndpointID)
+	}
+
+	if k == "" {
+		return ""
+	}
+
+	for i := range c.APIEndpoints {
+		k2 := strings.TrimSpace(strings.ToLower(c.APIEndpoints[i].ID))
+		if k == k2 {
+			return c.APIEndpoints[i].Address
+		}
+	}
+
+	return ""
 }
 
 //Flag - get a flag value
