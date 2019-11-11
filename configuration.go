@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"log"
+	"os"
 	"strconv"
 	"strings"
 )
@@ -102,19 +103,27 @@ type Configuration struct {
 	Domains           []DomainInfo       `json:"Domains,omitempty"`
 	Notifications     []NotificationInfo `json:"Notifications,omitempty"`
 	Flags             []Flag             `json:"Flags,omitempty"`
+	fileName          string
+	errorText         string
 }
 
 // LoadConfig - load configuration file and return a configuration
 func LoadConfig(fileName string) (*Configuration, error) {
 	config := &Configuration{}
+	config.errorText = ""
+
 	b, err := ioutil.ReadFile(fileName)
 
 	if err != nil {
+		config.errorText = err.Error()
 		return nil, err
 	}
 
+	config.fileName = fileName
+
 	err = json.Unmarshal(b, config)
 	if err != nil {
+		config.errorText = err.Error()
 		log.Fatal(err)
 	}
 
@@ -194,6 +203,28 @@ func (c *Configuration) GetEndpoint(id string) string {
 	}
 
 	return ""
+}
+
+// Save - save configuration file
+func (c *Configuration) Save() bool {
+	c.errorText = ""
+	b, err := json.MarshalIndent(c, "", "\t")
+	if err != nil {
+		c.errorText = err.Error()
+		return false
+	}
+
+	err = ioutil.WriteFile(c.fileName, b, os.ModePerm)
+	if err != nil {
+		c.errorText = err.Error()
+		return false
+	}
+	return true
+}
+
+// LastErrorText - gets the last error
+func (c *Configuration) LastErrorText() string {
+	return c.errorText
 }
 
 //Flag - get a flag value

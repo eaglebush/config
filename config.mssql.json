@@ -1,56 +1,75 @@
 {
-    "HostExternalURL": "",
-    "HostPort" : 8000,
-    "HMAC": "thisisanhmacsecretkey",
-    "DefaultDatabaseID": "DEFAULT",    
-    "Databases" : [
-        {
-            "ID" : "DEFAULT",
-            "ConnectionString" : "sqlserver://admin:fantastic4@192.168.1.19?database=ZX_APPSDB&connection+timeout=0&encrypt=disable",
-            "DriverName" : "mssql",
-            "StorageType": "SERVER",
-            "GroupID": "PICKLISTDEST",
-            "SequenceGenerator" : {
-                "UpsertQuery" : "",
-                "ResultQuery" : "DECLARE @surrogatekey INT; EXEC dbo.spGetNextSurrogateKey '{SequenceName}', @surrogatekey OUTPUT; SELECT @surrogatekey;",
-                "NamePlaceHolder": "{SequenceName}"
-            },
-             "KeywordMap": [
-                 {"Key": "SAVEPOINT_START", "Value": "SAVE TRANSACTION"},
-                 {"Key": "SAVEPOINT_RELEASE", "Value": "ROLLBACK TRANSACTION"}
-            ] 
-        } 
-    ],   
-    "Domains": [
-        {
-            "Name":"VDIMDCI",
-            "Host":"192.168.1.24",
-            "Port" : 389,
-            "Path": "DC=VDIMDCI,DC=COM,DC=PH",
-            "AuthorizedUser": "kapitan",
-            "AuthorizedPassword": "D0m@1nAdm1n",
-            "Filter": "(objectClass=person)"
-        }
-    ],
-    "Notifications" : {
-        "APIHost": "http://hulk.vdimdci.com.ph",
-        "APIPath": "/api/notify/email/",
-        "Type": "EMAIL",
-        "Login" : "",
-        "Password" : "",        
-        "Active": true,
-        "SenderAddress": "info@mail.com",
-        "SenderName": "Administrator",
-        "Recipients": [
-            {
-                "ID":"test",
-                "ContactName":"Test User",
-                "ContactAddress":"testuser@yahoo.com"
-            }
-        ]
-    },
-    
-    "Flags" : [
-        {"Key": "Joan", "Value":"Mosqueda"}
-    ]
+	"DefaultDatabaseID": "DEFAULT",
+	"HostPort": 8000,
+	"HMAC": "thisisanhmacsecretkey",
+	"LicenseSerial": "12345678",
+	"Databases": [
+		{
+			"ID": "DEFAULT",
+			"ConnectionString": "sqlserver://admin:fantastic4@192.168.1.19?database=ZX_APPSDB\u0026connection+timeout=0\u0026encrypt=disable",
+			"DriverName": "mssql",
+			"StorageType": "SERVER",
+			"ParameterPlaceholder": "?",
+			"ParameterInSequence": false,
+			"GroupID": "PICKLISTDEST",
+			"SequenceGenerator": {
+				"UpsertQuery": "",
+				"ResultQuery": "DECLARE @surrogatekey INT; EXEC dbo.spGetNextSurrogateKey '{SequenceName}', @surrogatekey OUTPUT; SELECT @surrogatekey;",
+				"NamePlaceHolder": "{SequenceName}"
+			},
+			"IdentityQuery": "SELECT SCOPE_IDENTITY();",
+			"DateFunction": "",
+			"UTCDateFunction": "",
+			"MaxOpenConnection": 0,
+			"MaxIdleConnection": 0,
+			"MaxConnectionLifetime": 0,
+			"Ping": false,
+			"KeywordMap": [
+				{
+					"Key": "SAVEPOINT_START",
+					"Value": "SAVE TRANSACTION"
+				},
+				{
+					"Key": "SAVEPOINT_RELEASE",
+					"Value": "ROLLBACK TRANSACTION"
+				}
+			]
+		}
+	],
+	"Domains": [
+		{
+			"Name": "VDIMDCI",
+			"Host": "192.168.1.24",
+			"Port": 389,
+			"Path": "DC=VDIMDCI,DC=COM,DC=PH",
+			"AuthorizedUser": "kapitan",
+			"AuthorizedPassword": "D0m@1nAdm1n",
+			"Filter": "(objectClass=person)"
+		}
+	],
+	"Notifications": [
+		{
+			"APIHost": "http://hulk.vdimdci.com.ph",
+			"APIPath": "/api/notify/email/",
+			"Type": "EMAIL",
+			"Login": "",
+			"Password": "",
+			"Active": true,
+			"SenderAddress": "info@mail.com",
+			"SenderName": "Administrator",
+			"Recipients": [
+				{
+					"ID": "test",
+					"ContactName": "Test User",
+					"ContactAddress": "testuser@yahoo.com"
+				}
+			]
+		}
+	],
+	"Flags": [
+		{
+			"Key": "Joan",
+			"Value": "Mosqueda"
+		}
+	]
 }
