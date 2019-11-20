@@ -1,7 +1,20 @@
 {
+	"APIEndpoints": [
+		{
+			"ID": "DEFAULT",
+			"Address": ""
+		}
+	],
+	"APIKey": "00000",
+	"ApplicationID": "Default",
+	"ApplicationName":"Default Application",
+	"ApplicationTheme":"default",
 	"DefaultDatabaseID": "DEFAULT",
 	"HostPort": 8000,
 	"HMAC": "thisisanhmacsecretkey",
+	"DefaultEndpointID":"",
+	"HostInternalURL":"",
+	"HostExternalURL":"",
 	"LicenseSerial": "12345678",
 	"Databases": [
 		{
