@@ -2,6 +2,7 @@ package cfg
 
 import (
 	"encoding/json"
+	"errors"
 	"io/ioutil"
 	"log"
 	"os"
@@ -23,11 +24,13 @@ type DatabaseKeyword struct {
 // Endpoint - endpoint struct
 type Endpoint struct {
 	ID      string
+	Name    string
 	Address string
 }
 
 // NotificationInfo - notification information on connecting to Notify API
 type NotificationInfo struct {
+	ID            string
 	APIHost       string
 	APIPath       string
 	Type          string
@@ -86,25 +89,26 @@ type NotificationRecipient struct {
 
 //Configuration - for various configuration settings. This struct can be modified depending on the requirement.
 type Configuration struct {
-	APIEndpoints      []Endpoint         `json:"APIEndpoints,omitempty"`
-	APIKey            string             `json:"APIKey,omitempty"`
-	ApplicationID     string             `json:"ApplicationID,omitempty"`
-	ApplicationName   string             `json:"ApplicationName,omitempty"`
-	ApplicationTheme  string             `json:"ApplicationTheme,omitempty"`
-	CookieDomain      string             `json:"CookieDomain,omitempty"`
-	DefaultDatabaseID string             `json:"DefaultDatabaseID,omitempty"`
-	DefaultEndpointID string             `json:"DefaultEndpointID,omitempty"`
-	HostInternalURL   string             `json:"HostInternalURL,omitempty"`
-	HostExternalURL   string             `json:"HostExternalURL,omitempty"`
-	HostPort          int                `json:"HostPort,omitempty"`
-	HMAC              string             `json:"HMAC,omitempty"`
-	LicenseSerial     string             `json:"LicenseSerial,omitempty"`
-	Databases         []DatabaseInfo     `json:"Databases,omitempty"`
-	Domains           []DomainInfo       `json:"Domains,omitempty"`
-	Notifications     []NotificationInfo `json:"Notifications,omitempty"`
-	Flags             []Flag             `json:"Flags,omitempty"`
-	fileName          string
-	errorText         string
+	APIEndpoints          []Endpoint         `json:"APIEndpoints,omitempty"`
+	APIKey                string             `json:"APIKey,omitempty"`
+	ApplicationID         string             `json:"ApplicationID,omitempty"`
+	ApplicationName       string             `json:"ApplicationName,omitempty"`
+	ApplicationTheme      string             `json:"ApplicationTheme,omitempty"`
+	CookieDomain          string             `json:"CookieDomain,omitempty"`
+	DefaultDatabaseID     string             `json:"DefaultDatabaseID,omitempty"`
+	DefaultEndpointID     string             `json:"DefaultEndpointID,omitempty"`
+	DefaultNotificationID string             `json:"DefaultNotificationID,omitempty"`
+	HostInternalURL       string             `json:"HostInternalURL,omitempty"`
+	HostExternalURL       string             `json:"HostExternalURL,omitempty"`
+	HostPort              int                `json:"HostPort,omitempty"`
+	HMAC                  string             `json:"HMAC,omitempty"`
+	LicenseSerial         string             `json:"LicenseSerial,omitempty"`
+	Databases             []DatabaseInfo     `json:"Databases,omitempty"`
+	Domains               []DomainInfo       `json:"Domains,omitempty"`
+	Notifications         []NotificationInfo `json:"Notifications,omitempty"`
+	Flags                 []Flag             `json:"Flags,omitempty"`
+	fileName              string
+	errorText             string
 }
 
 // LoadConfig - load configuration file and return a configuration
@@ -131,18 +135,43 @@ func LoadConfig(fileName string) (*Configuration, error) {
 		return nil, err
 	}
 
-	for i := range config.Databases {
-		if config.Databases[i].ParameterPlaceholder == "" {
+	if config.DefaultDatabaseID == "" {
+		config.DefaultDatabaseID = "DEFAULT"
+	}
+
+	if config.DefaultEndpointID == "" {
+		config.DefaultEndpointID = "DEFAULT"
+	}
+
+	if config.DefaultNotificationID == "" {
+		config.DefaultNotificationID = "DEFAULT"
+	}
+
+	// Default setting for database
+	for i, cd := range config.Databases {
+
+		if cd.ParameterPlaceholder == "" {
 			config.Databases[i].ParameterPlaceholder = "?"
 		}
 
-		if config.Databases[i].StorageType == "" {
+		if cd.StorageType == "" {
 			config.Databases[i].StorageType = "SERVER"
 		}
 
-		drivern := strings.ToLower(config.Databases[i].DriverName)
-		if config.Databases[i].StorageType == "SERVER" && (drivern == "sqlserver" || drivern == "mssql") {
+		drivern := strings.ToLower(cd.DriverName)
+		if cd.StorageType == "SERVER" && (drivern == "sqlserver" || drivern == "mssql") {
 			config.Databases[i].IdentityQuery = "SELECT SCOPE_IDENTITY();"
+		}
+	}
+
+	// check if there is a notification
+	defnum := ""
+	for i, cn := range config.Notifications {
+		if i > 0 {
+			defnum = string(i)
+		}
+		if cn.ID == "" {
+			config.Notifications[i].ID = "DEFAULT" + defnum
 		}
 	}
 
@@ -184,8 +213,11 @@ func (c *Configuration) GetDomainInfo(DomainName string) *DomainInfo {
 }
 
 //GetEndpoint - get an endpoint value
-func (c *Configuration) GetEndpoint(id string) string {
-	k := strings.ToLower(id)
+func (c *Configuration) GetEndpoint(id ...string) string {
+	var k string
+	if len(id) > 0 {
+		k = strings.ToLower(id[0])
+	}
 
 	if k == "" {
 		k = strings.ToLower(c.DefaultEndpointID)
@@ -203,6 +235,33 @@ func (c *Configuration) GetEndpoint(id string) string {
 	}
 
 	return ""
+}
+
+// GetNotificationInfo - get notification info
+func (c *Configuration) GetNotificationInfo(id ...string) (NotificationInfo, error) {
+	ni := NotificationInfo{}
+
+	var k string
+	if len(id) > 0 {
+		k = strings.ToLower(id[0])
+	}
+
+	if k == "" {
+		k = strings.ToLower(c.DefaultNotificationID)
+	}
+
+	if len(c.Notifications) == 0 {
+		return ni, errors.New("No notification configuration could be found")
+	}
+
+	for i := range c.Notifications {
+		k2 := strings.TrimSpace(strings.ToLower(c.Notifications[i].ID))
+		if k == k2 {
+			return c.Notifications[i], nil
+		}
+	}
+
+	return ni, errors.New("Notification could not be found")
 }
 
 // Save - save configuration file
