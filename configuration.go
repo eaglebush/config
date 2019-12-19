@@ -95,6 +95,7 @@ type Configuration struct {
 	ApplicationName       string             `json:"ApplicationName,omitempty"`
 	ApplicationTheme      string             `json:"ApplicationTheme,omitempty"`
 	CookieDomain          string             `json:"CookieDomain,omitempty"`
+	CrossOriginDomains    []string           `json:"CrossOriginDomains,omitempty"`
 	DefaultDatabaseID     string             `json:"DefaultDatabaseID,omitempty"`
 	DefaultEndpointID     string             `json:"DefaultEndpointID,omitempty"`
 	DefaultNotificationID string             `json:"DefaultNotificationID,omitempty"`
