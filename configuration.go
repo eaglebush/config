@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"io/ioutil"
-	"log"
 	"os"
 	"strconv"
 	"strings"
@@ -102,13 +101,13 @@ type Configuration struct {
 	HostInternalURL       string             `json:"HostInternalURL,omitempty"`
 	HostExternalURL       string             `json:"HostExternalURL,omitempty"`
 	HostPort              int                `json:"HostPort,omitempty"`
-	HMAC                  string             `json:"HMAC,omitempty"`
+	JWTSecret             string             `json:"JWTSecret,omitempty"`
 	LicenseSerial         string             `json:"LicenseSerial,omitempty"`
 	Databases             []DatabaseInfo     `json:"Databases,omitempty"`
 	Domains               []DomainInfo       `json:"Domains,omitempty"`
 	Notifications         []NotificationInfo `json:"Notifications,omitempty"`
 	Flags                 []Flag             `json:"Flags,omitempty"`
-	fileName              string
+	FileName              string
 	errorText             string
 }
 
@@ -124,15 +123,11 @@ func LoadConfig(fileName string) (*Configuration, error) {
 		return nil, err
 	}
 
-	config.fileName = fileName
+	config.FileName = fileName
 
 	err = json.Unmarshal(b, config)
 	if err != nil {
 		config.errorText = err.Error()
-		log.Fatal(err)
-	}
-
-	if err != nil {
 		return nil, err
 	}
 
@@ -267,15 +262,16 @@ func (c *Configuration) GetNotificationInfo(id ...string) (NotificationInfo, err
 
 // Save - save configuration file
 func (c *Configuration) Save() bool {
+	var b []byte
+	var err error
+
 	c.errorText = ""
-	b, err := json.MarshalIndent(c, "", "\t")
-	if err != nil {
+	if b, err = json.MarshalIndent(c, "", "\t"); err != nil {
 		c.errorText = err.Error()
 		return false
 	}
 
-	err = ioutil.WriteFile(c.fileName, b, os.ModePerm)
-	if err != nil {
+	if err = ioutil.WriteFile(c.FileName, b, os.ModePerm); err != nil {
 		c.errorText = err.Error()
 		return false
 	}
@@ -292,8 +288,7 @@ func (c *Configuration) Flag(key string) Flag {
 	k := strings.ToLower(key)
 
 	for i := range c.Flags {
-		k2 := strings.TrimSpace(strings.ToLower(c.Flags[i].Key))
-		if k == k2 {
+		if k2 := strings.TrimSpace(strings.ToLower(c.Flags[i].Key)); k == k2 {
 			return c.Flags[i]
 		}
 	}

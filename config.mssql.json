@@ -2,24 +2,24 @@
 	"APIEndpoints": [
 		{
 			"ID": "DEFAULT",
+			"Name": "",
 			"Address": ""
 		}
 	],
 	"APIKey": "00000",
 	"ApplicationID": "Default",
-	"ApplicationName":"Default Application",
-	"ApplicationTheme":"default",
+	"ApplicationName": "Default Application",
+	"ApplicationTheme": "default",
 	"DefaultDatabaseID": "DEFAULT",
+	"DefaultEndpointID": "DEFAULT",
+	"DefaultNotificationID": "DEFAULT",
 	"HostPort": 8000,
-	"HMAC": "thisisanhmacsecretkey",
-	"DefaultEndpointID":"",
-	"HostInternalURL":"",
-	"HostExternalURL":"",
+	"JWTSecret": "thisisanhmacsecretkey",
 	"LicenseSerial": "12345678",
 	"Databases": [
 		{
 			"ID": "DEFAULT",
-			"ConnectionString": "sqlserver://admin:fantastic4@192.168.1.19?database=ZX_APPSDB\u0026connection+timeout=0\u0026encrypt=disable",
+			"ConnectionString": "sqlserver://admin:fantastic4@192.168.1.19?database=APPSDB\u0026connection+timeout=0\u0026encrypt=disable",
 			"DriverName": "mssql",
 			"StorageType": "SERVER",
 			"ParameterPlaceholder": "?",
@@ -62,6 +62,7 @@
 	],
 	"Notifications": [
 		{
+			"ID": "DEFAULT",
 			"APIHost": "http://hulk.vdimdci.com.ph",
 			"APIPath": "/api/notify/email/",
 			"Type": "EMAIL",
