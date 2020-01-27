@@ -27,6 +27,6 @@ func TestLoadConfig(t *testing.T) {
 
 	ok := config.Save()
 	if !ok {
-		fmt.Printf("%w", config.LastErrorText())
+		fmt.Printf("%s", config.LastErrorText())
 	}
 }

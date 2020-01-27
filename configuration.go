@@ -153,10 +153,23 @@ func LoadConfig(fileName string) (*Configuration, error) {
 		if cd.StorageType == "" {
 			config.Databases[i].StorageType = "SERVER"
 		}
+		cd.StorageType = strings.ToUpper(cd.StorageType)
 
 		drivern := strings.ToLower(cd.DriverName)
 		if cd.StorageType == "SERVER" && (drivern == "sqlserver" || drivern == "mssql") {
-			config.Databases[i].IdentityQuery = "SELECT SCOPE_IDENTITY();"
+
+			if config.Databases[i].IdentityQuery == "" {
+				config.Databases[i].IdentityQuery = "SELECT SCOPE_IDENTITY();"
+			}
+
+			if config.Databases[i].UTCDateFunction == "" {
+				config.Databases[i].UTCDateFunction = "GETUTCDATE()"
+			}
+
+			if config.Databases[i].DateFunction == "" {
+				config.Databases[i].DateFunction = "GETDATE()"
+			}
+
 		}
 	}
 
@@ -166,6 +179,7 @@ func LoadConfig(fileName string) (*Configuration, error) {
 		if i > 0 {
 			defnum = string(i)
 		}
+
 		if cn.ID == "" {
 			config.Notifications[i].ID = "DEFAULT" + defnum
 		}

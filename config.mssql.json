@@ -67,8 +67,7 @@
 			"APIPath": "/api/notify/email/",
 			"Type": "EMAIL",
 			"Login": "",
-			"Password": "",
-			"Active": true,
+			"Password": "",			
 			"SenderAddress": "info@mail.com",
 			"SenderName": "Administrator",
 			"Recipients": [
