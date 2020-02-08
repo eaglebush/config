@@ -86,6 +86,13 @@ type NotificationRecipient struct {
 	ContactAddress string
 }
 
+// QueueInfo - queue info connector
+type QueueInfo struct {
+	ServerAddress string `json:"ServerAddress,omitempty"`
+	Cluster       string `json:"Cluster,omitempty"`
+	ClientID      string `json:"ClientID,omitempty"`
+}
+
 //Configuration - for various configuration settings. This struct can be modified depending on the requirement.
 type Configuration struct {
 	APIEndpoints          []Endpoint         `json:"APIEndpoints,omitempty"`
@@ -107,7 +114,8 @@ type Configuration struct {
 	Domains               []DomainInfo       `json:"Domains,omitempty"`
 	Notifications         []NotificationInfo `json:"Notifications,omitempty"`
 	Flags                 []Flag             `json:"Flags,omitempty"`
-	FileName              string
+	FileName              string             `json:"FileName,omitempty"`
+	Queue                 QueueInfo          `json:"Queue,omitempty"`
 	errorText             string
 }
 

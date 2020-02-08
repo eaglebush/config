@@ -67,7 +67,7 @@
 			"APIPath": "/api/notify/email/",
 			"Type": "EMAIL",
 			"Login": "",
-			"Password": "",			
+			"Password": "",
 			"SenderAddress": "info@mail.com",
 			"SenderName": "Administrator",
 			"Recipients": [
@@ -84,5 +84,10 @@
 			"Key": "Joan",
 			"Value": "Mosqueda"
 		}
-	]
+	],
+	"Queue": {
+		"ServerAddress": "",
+		"Cluster": "",
+		"ClientID": "auto"
+	}
 }
