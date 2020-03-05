@@ -14,8 +14,11 @@
 	"DefaultEndpointID": "DEFAULT",
 	"DefaultNotificationID": "DEFAULT",
 	"HostPort": 8000,
+	"ReadTimeout": 30,
+	"WriteTimeout": 30,
 	"JWTSecret": "thisisanhmacsecretkey",
 	"LicenseSerial": "12345678",
+	"Secure": false,
 	"Databases": [
 		{
 			"ID": "DEFAULT",

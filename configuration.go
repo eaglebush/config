@@ -100,6 +100,9 @@ type Configuration struct {
 	ApplicationID         string             `json:"ApplicationID,omitempty"`
 	ApplicationName       string             `json:"ApplicationName,omitempty"`
 	ApplicationTheme      string             `json:"ApplicationTheme,omitempty"`
+	CertificateFile       string             `json:"CertificateFile,omitempty"`
+	CertificateKey        string             `json:"CertificateKey,omitempty"`
+	Secure                bool               `json:"Secure,omitempty"`
 	CookieDomain          string             `json:"CookieDomain,omitempty"`
 	CrossOriginDomains    []string           `json:"CrossOriginDomains,omitempty"`
 	DefaultDatabaseID     string             `json:"DefaultDatabaseID,omitempty"`
@@ -108,6 +111,8 @@ type Configuration struct {
 	HostInternalURL       string             `json:"HostInternalURL,omitempty"`
 	HostExternalURL       string             `json:"HostExternalURL,omitempty"`
 	HostPort              int                `json:"HostPort,omitempty"`
+	ReadTimeout           int                `json:"ReadTimeout,omitempty"`
+	WriteTimeout          int                `json:"WriteTimeout,omitempty"`
 	JWTSecret             string             `json:"JWTSecret,omitempty"`
 	LicenseSerial         string             `json:"LicenseSerial,omitempty"`
 	Databases             []DatabaseInfo     `json:"Databases,omitempty"`

@@ -25,8 +25,8 @@ func TestLoadConfig(t *testing.T) {
 
 	config.LicenseSerial = "12345678"
 
-	ok := config.Save()
-	if !ok {
-		fmt.Printf("%s", config.LastErrorText())
-	}
+	// ok := config.Save()
+	// if !ok {
+	// 	fmt.Printf("%s", config.LastErrorText())
+	// }
 }
