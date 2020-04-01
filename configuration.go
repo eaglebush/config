@@ -95,32 +95,32 @@ type QueueInfo struct {
 
 //Configuration - for various configuration settings. This struct can be modified depending on the requirement.
 type Configuration struct {
-	APIEndpoints          []Endpoint         `json:"APIEndpoints,omitempty"`
-	APIKey                string             `json:"APIKey,omitempty"`
-	ApplicationID         string             `json:"ApplicationID,omitempty"`
-	ApplicationName       string             `json:"ApplicationName,omitempty"`
-	ApplicationTheme      string             `json:"ApplicationTheme,omitempty"`
-	CertificateFile       string             `json:"CertificateFile,omitempty"`
-	CertificateKey        string             `json:"CertificateKey,omitempty"`
-	Secure                bool               `json:"Secure,omitempty"`
-	CookieDomain          string             `json:"CookieDomain,omitempty"`
-	CrossOriginDomains    []string           `json:"CrossOriginDomains,omitempty"`
-	DefaultDatabaseID     string             `json:"DefaultDatabaseID,omitempty"`
-	DefaultEndpointID     string             `json:"DefaultEndpointID,omitempty"`
-	DefaultNotificationID string             `json:"DefaultNotificationID,omitempty"`
-	HostInternalURL       string             `json:"HostInternalURL,omitempty"`
-	HostExternalURL       string             `json:"HostExternalURL,omitempty"`
-	HostPort              int                `json:"HostPort,omitempty"`
-	ReadTimeout           int                `json:"ReadTimeout,omitempty"`
-	WriteTimeout          int                `json:"WriteTimeout,omitempty"`
-	JWTSecret             string             `json:"JWTSecret,omitempty"`
-	LicenseSerial         string             `json:"LicenseSerial,omitempty"`
-	Databases             []DatabaseInfo     `json:"Databases,omitempty"`
-	Domains               []DomainInfo       `json:"Domains,omitempty"`
-	Notifications         []NotificationInfo `json:"Notifications,omitempty"`
-	Flags                 []Flag             `json:"Flags,omitempty"`
-	FileName              string             `json:"FileName,omitempty"`
-	Queue                 QueueInfo          `json:"Queue,omitempty"`
+	APIEndpoints          []Endpoint         `json:"APIEndpoints,omitempty"`          // External API endpoints that this application can communicate
+	APIKey                string             `json:"APIKey,omitempty"`                // Registration key
+	ApplicationID         string             `json:"ApplicationID,omitempty"`         // ID of this application
+	ApplicationName       string             `json:"ApplicationName,omitempty"`       // Name of this application
+	ApplicationTheme      string             `json:"ApplicationTheme,omitempty"`      // Theme of this application
+	CertificateFile       string             `json:"CertificateFile,omitempty"`       // Certificate file
+	CertificateKey        string             `json:"CertificateKey,omitempty"`        // Certificate private key
+	Secure                bool               `json:"Secure,omitempty"`                // Flags if secure
+	CookieDomain          string             `json:"CookieDomain,omitempty"`          // The domain of the cookie that this application will send
+	CrossOriginDomains    []string           `json:"CrossOriginDomains,omitempty"`    // Domains or endpoints that this application will allow
+	DefaultDatabaseID     string             `json:"DefaultDatabaseID,omitempty"`     // The default database id that this application will find on the database configuration
+	DefaultEndpointID     string             `json:"DefaultEndpointID,omitempty"`     // The default endpoint that this application will find on the API endpoints configuration
+	DefaultNotificationID string             `json:"DefaultNotificationID,omitempty"` // The default notification id that this application will find on the notification configuration
+	HostInternalURL       string             `json:"HostInternalURL,omitempty"`       // The internal host URL that this application will use to set returned resources and assets
+	HostExternalURL       string             `json:"HostExternalURL,omitempty"`       // The external host URL that this application will use to set returned resources and assets
+	HostPort              int                `json:"HostPort,omitempty"`              // The network port for the application
+	ReadTimeout           int                `json:"ReadTimeout,omitempty"`           // Default network timeout setting for reading data uploaded to this application
+	WriteTimeout          int                `json:"WriteTimeout,omitempty"`          // Default network timeout setting for writing data downloaded from this application
+	JWTSecret             string             `json:"JWTSecret,omitempty"`             // Application wide JSON Web Token (JWT) secret
+	LicenseSerial         string             `json:"LicenseSerial,omitempty"`         // License serial of this application
+	Databases             []DatabaseInfo     `json:"Databases,omitempty"`             // Configured databases for this application use
+	Domains               []DomainInfo       `json:"Domains,omitempty"`               // Configured domains for this application use
+	Notifications         []NotificationInfo `json:"Notifications,omitempty"`         // Configured notifications for this application use
+	Flags                 []Flag             `json:"Flags,omitempty"`                 // Miscellaneous flags for this application use
+	FileName              string             `json:"FileName,omitempty"`              // Filename of the current configuration
+	Queue                 QueueInfo          `json:"Queue,omitempty"`                 // Queue or message queue
 	errorText             string
 }
 
