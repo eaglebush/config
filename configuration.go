@@ -5,15 +5,8 @@ import (
 	"errors"
 	"io/ioutil"
 	"os"
-	"strconv"
 	"strings"
 )
-
-// Flag - dynamic flags structure
-type Flag struct {
-	Key   string
-	Value string
-}
 
 // DatabaseKeyword - struct for database keywords
 type DatabaseKeyword struct {
@@ -79,7 +72,7 @@ type DatabaseInfo struct {
 	KeywordMap            []DatabaseKeyword     // various keyword equivalents
 }
 
-//NotificationRecipient - notification standard recipients
+// NotificationRecipient - notification standard recipients
 type NotificationRecipient struct {
 	ID             string
 	ContactName    string
@@ -88,12 +81,23 @@ type NotificationRecipient struct {
 
 // QueueInfo - queue info connector
 type QueueInfo struct {
-	ServerAddress string `json:"ServerAddress,omitempty"`
-	Cluster       string `json:"Cluster,omitempty"`
-	ClientID      string `json:"ClientID,omitempty"`
+	ID            string `json:"ID,omitempty"`            // ID of the setting
+	ServerAddress string `json:"ServerAddress,omitempty"` // Queue server address
+	Cluster       string `json:"Cluster,omitempty"`       // Cluster name
+	ClientID      string `json:"ClientID,omitempty"`      // ClientID of the service
 }
 
-//Configuration - for various configuration settings. This struct can be modified depending on the requirement.
+// SourceInfo - file sources for configuration
+type SourceInfo struct {
+	ID            string `json:"id,omitempty"`        // ID of the source for quick reference
+	Type          string `json:"type,omitempty"`      // Type of Inbound file. Supported types are ORDER and SNAPSHOT
+	FolderSource  string `json:"source,omitempty"`    // Source folder of the source
+	FolderError   string `json:"error,omitempty"`     // Error folder of the source
+	FolderSuccess string `json:"success,omitempty"`   // Success folder of the source
+	FileExtension string `json:"extension,omitempty"` // Extension of the file to pickup
+}
+
+// Configuration - for various configuration settings. This struct can be modified depending on the requirement.
 type Configuration struct {
 	APIEndpoints          []Endpoint         `json:"APIEndpoints,omitempty"`          // External API endpoints that this application can communicate
 	APIKey                string             `json:"APIKey,omitempty"`                // Registration key
@@ -102,25 +106,26 @@ type Configuration struct {
 	ApplicationTheme      string             `json:"ApplicationTheme,omitempty"`      // Theme of this application
 	CertificateFile       string             `json:"CertificateFile,omitempty"`       // Certificate file
 	CertificateKey        string             `json:"CertificateKey,omitempty"`        // Certificate private key
-	Secure                bool               `json:"Secure,omitempty"`                // Flags if secure
 	CookieDomain          string             `json:"CookieDomain,omitempty"`          // The domain of the cookie that this application will send
 	CrossOriginDomains    []string           `json:"CrossOriginDomains,omitempty"`    // Domains or endpoints that this application will allow
+	Databases             []DatabaseInfo     `json:"Databases,omitempty"`             // Configured databases for this application use
 	DefaultDatabaseID     string             `json:"DefaultDatabaseID,omitempty"`     // The default database id that this application will find on the database configuration
 	DefaultEndpointID     string             `json:"DefaultEndpointID,omitempty"`     // The default endpoint that this application will find on the API endpoints configuration
 	DefaultNotificationID string             `json:"DefaultNotificationID,omitempty"` // The default notification id that this application will find on the notification configuration
+	Domains               []DomainInfo       `json:"Domains,omitempty"`               // Configured domains for this application use
+	FileName              string             `json:"FileName,omitempty"`              // Filename of the current configuration
+	Flags                 []Flag             `json:"Flags,omitempty"`                 // Miscellaneous flags for this application use
 	HostInternalURL       string             `json:"HostInternalURL,omitempty"`       // The internal host URL that this application will use to set returned resources and assets
 	HostExternalURL       string             `json:"HostExternalURL,omitempty"`       // The external host URL that this application will use to set returned resources and assets
 	HostPort              int                `json:"HostPort,omitempty"`              // The network port for the application
-	ReadTimeout           int                `json:"ReadTimeout,omitempty"`           // Default network timeout setting for reading data uploaded to this application
-	WriteTimeout          int                `json:"WriteTimeout,omitempty"`          // Default network timeout setting for writing data downloaded from this application
 	JWTSecret             string             `json:"JWTSecret,omitempty"`             // Application wide JSON Web Token (JWT) secret
 	LicenseSerial         string             `json:"LicenseSerial,omitempty"`         // License serial of this application
-	Databases             []DatabaseInfo     `json:"Databases,omitempty"`             // Configured databases for this application use
-	Domains               []DomainInfo       `json:"Domains,omitempty"`               // Configured domains for this application use
 	Notifications         []NotificationInfo `json:"Notifications,omitempty"`         // Configured notifications for this application use
-	Flags                 []Flag             `json:"Flags,omitempty"`                 // Miscellaneous flags for this application use
-	FileName              string             `json:"FileName,omitempty"`              // Filename of the current configuration
 	Queue                 QueueInfo          `json:"Queue,omitempty"`                 // Queue or message queue
+	ReadTimeout           int                `json:"ReadTimeout,omitempty"`           // Default network timeout setting for reading data uploaded to this application
+	Secure                bool               `json:"Secure,omitempty"`                // Flags if secure
+	Sources               []SourceInfo       `json:"Sources,omitempty"`               // Folder sources
+	WriteTimeout          int                `json:"WriteTimeout,omitempty"`          // Default network timeout setting for writing data downloaded from this application
 	errorText             string
 }
 
@@ -201,7 +206,7 @@ func LoadConfig(fileName string) (*Configuration, error) {
 	return config, nil
 }
 
-//GetDatabaseInfo - get a database info by ID
+// GetDatabaseInfo - get a database info by ID
 func (c *Configuration) GetDatabaseInfo(ConnectionID string) *DatabaseInfo {
 	for _, v := range c.Databases {
 		if v.ID == ConnectionID {
@@ -212,7 +217,7 @@ func (c *Configuration) GetDatabaseInfo(ConnectionID string) *DatabaseInfo {
 	return nil
 }
 
-//GetDatabaseInfoGroup - get database infos based on the group id
+// GetDatabaseInfoGroup - get database infos based on the group id
 func (c *Configuration) GetDatabaseInfoGroup(GroupID string) *[]DatabaseInfo {
 	dbgi := make([]DatabaseInfo, 0)
 	for _, v := range c.Databases {
@@ -224,7 +229,7 @@ func (c *Configuration) GetDatabaseInfoGroup(GroupID string) *[]DatabaseInfo {
 	return &dbgi
 }
 
-//GetDomainInfo - get a domain info by name
+// GetDomainInfo - get a domain info by name
 func (c *Configuration) GetDomainInfo(DomainName string) *DomainInfo {
 	for _, v := range c.Domains {
 		if v.Name == DomainName {
@@ -235,7 +240,7 @@ func (c *Configuration) GetDomainInfo(DomainName string) *DomainInfo {
 	return nil
 }
 
-//GetEndpoint - get an endpoint value
+// GetEndpoint - get an endpoint value
 func (c *Configuration) GetEndpoint(id ...string) string {
 	var k string
 	if len(id) > 0 {
@@ -287,6 +292,17 @@ func (c *Configuration) GetNotificationInfo(id ...string) (NotificationInfo, err
 	return ni, errors.New("Notification could not be found")
 }
 
+// GetSourceInfo - get source by id
+func (c *Configuration) GetSourceInfo(SourceID string) (*SourceInfo, error) {
+	for _, v := range c.Sources {
+		if v.ID == SourceID {
+			return &v, nil
+		}
+	}
+
+	return &SourceInfo{}, nil
+}
+
 // Save - save configuration file
 func (c *Configuration) Save() bool {
 	var b []byte
@@ -308,47 +324,4 @@ func (c *Configuration) Save() bool {
 // LastErrorText - gets the last error
 func (c *Configuration) LastErrorText() string {
 	return c.errorText
-}
-
-//Flag - get a flag value
-func (c *Configuration) Flag(key string) Flag {
-	k := strings.ToLower(key)
-
-	for i := range c.Flags {
-		if k2 := strings.TrimSpace(strings.ToLower(c.Flags[i].Key)); k == k2 {
-			return c.Flags[i]
-		}
-	}
-
-	return Flag{}
-}
-
-// Bool - return a boolean from flag value
-func (f Flag) Bool() bool {
-	v := strings.TrimSpace(f.Value)
-	v = strings.ToLower(v)
-	switch v {
-	case "1", "on", "yes", "enabled", "true":
-		return true
-	}
-	return false
-}
-
-// Int64 - return an int64 from flag value
-func (f Flag) Int64() int64 {
-	v := strings.TrimSpace(f.Value)
-	vi, _ := strconv.ParseInt(v, 0, 64)
-	return vi
-}
-
-// Int - return an int from flag value
-func (f Flag) Int() int {
-	v := strings.TrimSpace(f.Value)
-	vi, _ := strconv.Atoi(v)
-	return vi
-}
-
-// String - return a string from flag value
-func (f Flag) String() string {
-	return strings.TrimSpace(f.Value)
 }

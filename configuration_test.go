@@ -6,6 +6,12 @@ import (
 	"testing"
 )
 
+type EmbeddedConfiguration struct {
+	Configuration
+	ID   string
+	Name string
+}
+
 func TestLoadConfig(t *testing.T) {
 	config, _ := LoadConfig("config.mssql.json")
 

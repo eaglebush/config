@@ -19,6 +19,8 @@
 	"JWTSecret": "thisisanhmacsecretkey",
 	"LicenseSerial": "12345678",
 	"Secure": false,
+	"ID": "Test",
+	"Name" : "Test Name",
 	"Databases": [
 		{
 			"ID": "DEFAULT",
