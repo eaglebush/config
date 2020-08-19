@@ -62,6 +62,7 @@ type DatabaseInfo struct {
 	ParameterInSequence   bool                  // Parameter place holder is in sequence. Default is false
 	GroupID               string                // GroupID allows us to get groups of connection
 	SequenceGenerator     SequenceGeneratorInfo // Sequence generator configuration
+	Schema                string                // Schema for any of the database operations
 	IdentityQuery         string                // A query to get the generated identity
 	DateFunction          string                // The date function of each SQL database driver
 	UTCDateFunction       string                // The UTC date function of each SQL database driver
