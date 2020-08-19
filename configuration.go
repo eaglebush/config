@@ -54,23 +54,26 @@ type SequenceGeneratorInfo struct {
 
 //DatabaseInfo - database configuration setting
 type DatabaseInfo struct {
-	ID                    string                // A unique ID that will identify the connection to a database
-	ConnectionString      string                // ConnectionString specific to the database
-	DriverName            string                // DriverName needs to be specified depending on the driver id used by the Go database driver
-	StorageType           string                // FILE for filebased database such as Access, SQlite or LocalDB. SERVER for SQL Server, MySQL etc
-	ParameterPlaceholder  string                // Parameter place holder for prepared statements. Default is '?'
-	ParameterInSequence   bool                  // Parameter place holder is in sequence. Default is false
-	GroupID               string                // GroupID allows us to get groups of connection
-	SequenceGenerator     SequenceGeneratorInfo // Sequence generator configuration
-	Schema                string                // Schema for any of the database operations
-	IdentityQuery         string                // A query to get the generated identity
-	DateFunction          string                // The date function of each SQL database driver
-	UTCDateFunction       string                // The UTC date function of each SQL database driver
-	MaxOpenConnection     int                   // Maximum open connection
-	MaxIdleConnection     int                   // Maximum idle connection
-	MaxConnectionLifetime int                   // Max connection lifetime
-	Ping                  bool                  // Ping connection
-	KeywordMap            []DatabaseKeyword     // various keyword equivalents
+	ID                     string                // A unique ID that will identify the connection to a database
+	ConnectionString       string                // ConnectionString specific to the database
+	DriverName             string                // DriverName needs to be specified depending on the driver id used by the Go database driver
+	StorageType            string                // FILE for filebased database such as Access, SQlite or LocalDB. SERVER for SQL Server, MySQL etc
+	ParameterPlaceholder   string                // Parameter place holder for prepared statements. Default is '?'
+	ParameterInSequence    bool                  // Parameter place holder is in sequence. Default is false
+	GroupID                string                // GroupID allows us to get groups of connection
+	SequenceGenerator      SequenceGeneratorInfo // Sequence generator configuration
+	StringEnclosingChar    string                // Gets or sets the character that encloses a string in the query
+	StringEscapeChar       string                // Gets or Sets the character that escapes a reserved character such as the character that encloses a s string
+	Schema                 string                // Schema for any of the database operations
+	IdentityQuery          string                // A query to get the generated identity
+	DateFunction           string                // The date function of each SQL database driver
+	UTCDateFunction        string                // The UTC date function of each SQL database driver
+	MaxOpenConnection      int                   // Maximum open connection
+	MaxIdleConnection      int                   // Maximum idle connection
+	MaxConnectionLifetime  int                   // Max connection lifetime
+	Ping                   bool                  // Ping connection
+	ReservedWordEscapeChar string                // Reserved word escape chars. For escaping with different opening and closing characters, just set to both. Example. `[]` for SQL server
+	KeywordMap             []DatabaseKeyword     // various keyword equivalents
 }
 
 // NotificationRecipient - notification standard recipients

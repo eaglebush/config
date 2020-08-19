@@ -43,6 +43,9 @@
 			"MaxIdleConnection": 0,
 			"MaxConnectionLifetime": 0,
 			"Ping": false,
+			"StringEnclosingChar": "'",
+			"StringEscapeChar": "'",
+			"ReservedWordEscapeChar":"[]",
 			"KeywordMap": [
 				{
 					"Key": "SAVEPOINT_START",
