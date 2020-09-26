@@ -4,7 +4,9 @@ import (
 	"encoding/json"
 	"errors"
 	"io/ioutil"
+	"net/http"
 	"os"
+	"strconv"
 	"strings"
 )
 
@@ -134,18 +136,63 @@ type Configuration struct {
 }
 
 // LoadConfig - load configuration file and return a configuration
-func LoadConfig(fileName string) (*Configuration, error) {
-	config := &Configuration{}
-	config.errorText = ""
+func LoadConfig(Source string) (*Configuration, error) {
+	return load(Source)
+}
 
-	b, err := ioutil.ReadFile(fileName)
+func load(Source string) (*Configuration, error) {
 
-	if err != nil {
-		config.errorText = err.Error()
-		return nil, err
+	var (
+		err       error
+		b         []byte
+		islocfile bool
+	)
+
+	const def string = `DEFAULT`
+
+	config := &Configuration{
+		errorText: ``,
 	}
 
-	config.FileName = fileName
+	if !(strings.HasPrefix(Source, `http://`) || strings.HasPrefix(Source, `https://`)) {
+		islocfile = true
+	}
+
+	if islocfile {
+		if b, err = ioutil.ReadFile(Source); err != nil {
+			config.errorText = err.Error()
+			return config, err
+		}
+	} else {
+		if b, err = func() ([]byte, error) {
+
+			var ob []byte
+
+			nr, err := http.Get(Source)
+			if err != nil {
+				return ob, err
+			}
+			defer nr.Body.Close()
+
+			ob, err = ioutil.ReadAll(nr.Body)
+			if err != nil {
+				return ob, err
+			}
+
+			return ob, nil
+		}(); err != nil {
+			config.errorText = err.Error()
+			return config, err
+		}
+	}
+
+	if len(b) == 0 {
+		err = errors.New(`No data from source for configuration`)
+		config.errorText = err.Error()
+		return config, err
+	}
+
+	config.FileName = Source
 
 	err = json.Unmarshal(b, config)
 	if err != nil {
@@ -154,15 +201,15 @@ func LoadConfig(fileName string) (*Configuration, error) {
 	}
 
 	if config.DefaultDatabaseID == "" {
-		config.DefaultDatabaseID = "DEFAULT"
+		config.DefaultDatabaseID = def
 	}
 
 	if config.DefaultEndpointID == "" {
-		config.DefaultEndpointID = "DEFAULT"
+		config.DefaultEndpointID = def
 	}
 
 	if config.DefaultNotificationID == "" {
-		config.DefaultNotificationID = "DEFAULT"
+		config.DefaultNotificationID = def
 	}
 
 	// Default setting for database
@@ -199,11 +246,11 @@ func LoadConfig(fileName string) (*Configuration, error) {
 	defnum := ""
 	for i, cn := range config.Notifications {
 		if i > 0 {
-			defnum = string(i)
+			defnum = strconv.Itoa(i)
 		}
 
 		if cn.ID == "" {
-			config.Notifications[i].ID = "DEFAULT" + defnum
+			config.Notifications[i].ID = def + defnum
 		}
 	}
 
@@ -323,6 +370,12 @@ func (c *Configuration) Save() bool {
 		return false
 	}
 	return true
+}
+
+// Reload configuration
+func (c *Configuration) Reload() error {
+	_, err := load(c.FileName)
+	return err
 }
 
 // LastErrorText - gets the last error
