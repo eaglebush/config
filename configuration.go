@@ -215,28 +215,40 @@ func load(Source string) (*Configuration, error) {
 	// Default setting for database
 	for i, cd := range config.Databases {
 
+		if cd.StringEnclosingChar == "" {
+			cd.StringEnclosingChar = `'`
+		}
+
+		if cd.StringEscapeChar == "" {
+			cd.StringEscapeChar = `\`
+		}
+
 		if cd.ParameterPlaceholder == "" {
-			config.Databases[i].ParameterPlaceholder = "?"
+			config.Databases[i].ParameterPlaceholder = `?`
+		}
+
+		if cd.ReservedWordEscapeChar == "" {
+			cd.ReservedWordEscapeChar = `"`
 		}
 
 		if cd.StorageType == "" {
-			config.Databases[i].StorageType = "SERVER"
+			config.Databases[i].StorageType = `SERVER`
 		}
 		cd.StorageType = strings.ToUpper(cd.StorageType)
 
 		drivern := strings.ToLower(cd.DriverName)
-		if cd.StorageType == "SERVER" && (drivern == "sqlserver" || drivern == "mssql") {
+		if cd.StorageType == `SERVER` && (drivern == `sqlserver` || drivern == `mssql`) {
 
 			if config.Databases[i].IdentityQuery == "" {
-				config.Databases[i].IdentityQuery = "SELECT SCOPE_IDENTITY();"
+				config.Databases[i].IdentityQuery = `SELECT SCOPE_IDENTITY();`
 			}
 
 			if config.Databases[i].UTCDateFunction == "" {
-				config.Databases[i].UTCDateFunction = "GETUTCDATE()"
+				config.Databases[i].UTCDateFunction = `GETUTCDATE()`
 			}
 
 			if config.Databases[i].DateFunction == "" {
-				config.Databases[i].DateFunction = "GETDATE()"
+				config.Databases[i].DateFunction = `GETDATE()`
 			}
 
 		}
