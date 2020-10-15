@@ -98,5 +98,11 @@
 		"ServerAddress": "",
 		"Cluster": "",
 		"ClientID": "auto"
+	},
+	"Cache": {
+		"Provider": "redis",
+		"Address": "",
+		"Password": "",
+		"DB": "0"
 	}
 }

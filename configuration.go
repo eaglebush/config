@@ -36,7 +36,15 @@ type NotificationInfo struct {
 	Recipients    []NotificationRecipient
 }
 
-//DomainInfo - domain information for LDAP authentication
+// CacheInfo connection information
+type CacheInfo struct {
+	Provider string
+	Address  string
+	Password string
+	DB       int
+}
+
+// DomainInfo - domain information for LDAP authentication
 type DomainInfo struct {
 	Name               string
 	Host               string
@@ -110,6 +118,7 @@ type Configuration struct {
 	ApplicationID         string             `json:"ApplicationID,omitempty"`         // ID of this application
 	ApplicationName       string             `json:"ApplicationName,omitempty"`       // Name of this application
 	ApplicationTheme      string             `json:"ApplicationTheme,omitempty"`      // Theme of this application
+	Cache                 CacheInfo          `json:"Cache,omitempty"`                 // Cache info of this application
 	CertificateFile       string             `json:"CertificateFile,omitempty"`       // Certificate file
 	CertificateKey        string             `json:"CertificateKey,omitempty"`        // Certificate private key
 	CookieDomain          string             `json:"CookieDomain,omitempty"`          // The domain of the cookie that this application will send
