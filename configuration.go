@@ -67,6 +67,7 @@ type DatabaseInfo struct {
 	ID                     string                // A unique ID that will identify the connection to a database
 	ConnectionString       string                // ConnectionString specific to the database
 	DriverName             string                // DriverName needs to be specified depending on the driver id used by the Go database driver
+	InterpolateTables      bool                  // Enables the tables to be interpolated with schema
 	StorageType            string                // FILE for filebased database such as Access, SQlite or LocalDB. SERVER for SQL Server, MySQL etc
 	ParameterPlaceholder   string                // Parameter place holder for prepared statements. Default is '?'
 	ParameterInSequence    bool                  // Parameter place holder is in sequence. Default is false
