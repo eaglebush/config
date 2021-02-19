@@ -103,6 +103,6 @@
 		"Provider": "redis",
 		"Address": "",
 		"Password": "",
-		"DB": "0"
+		"DB": 0
 	}
 }

@@ -64,27 +64,27 @@ type SequenceGeneratorInfo struct {
 
 //DatabaseInfo - database configuration setting
 type DatabaseInfo struct {
-	ID                     string                // A unique ID that will identify the connection to a database
-	ConnectionString       string                // ConnectionString specific to the database
-	DriverName             string                // DriverName needs to be specified depending on the driver id used by the Go database driver
-	InterpolateTables      bool                  // Enables the tables to be interpolated with schema
-	StorageType            string                // FILE for filebased database such as Access, SQlite or LocalDB. SERVER for SQL Server, MySQL etc
-	ParameterPlaceholder   string                // Parameter place holder for prepared statements. Default is '?'
-	ParameterInSequence    bool                  // Parameter place holder is in sequence. Default is false
-	GroupID                string                // GroupID allows us to get groups of connection
-	SequenceGenerator      SequenceGeneratorInfo // Sequence generator configuration
-	StringEnclosingChar    string                // Gets or sets the character that encloses a string in the query
-	StringEscapeChar       string                // Gets or Sets the character that escapes a reserved character such as the character that encloses a s string
-	Schema                 string                // Schema for any of the database operations
-	IdentityQuery          string                // A query to get the generated identity
-	DateFunction           string                // The date function of each SQL database driver
-	UTCDateFunction        string                // The UTC date function of each SQL database driver
-	MaxOpenConnection      int                   // Maximum open connection
-	MaxIdleConnection      int                   // Maximum idle connection
-	MaxConnectionLifetime  int                   // Max connection lifetime
-	Ping                   bool                  // Ping connection
-	ReservedWordEscapeChar string                // Reserved word escape chars. For escaping with different opening and closing characters, just set to both. Example. `[]` for SQL server
-	KeywordMap             []DatabaseKeyword     // various keyword equivalents
+	ID                     string                 `json:"ID"`                               // A unique ID that will identify the connection to a database
+	ConnectionString       string                 `json:"ConnectionString"`                 // ConnectionString specific to the database
+	DriverName             string                 `json:"DriverName"`                       // DriverName needs to be specified depending on the driver id used by the Go database driver
+	StorageType            string                 `json:"StorageType"`                      // FILE for filebased database such as Access, SQlite or LocalDB. SERVER for SQL Server, MySQL etc
+	ParameterPlaceholder   string                 `json:"ParameterPlaceholder,omitempty"`   // Parameter place holder for prepared statements. Default is '?'
+	ParameterInSequence    bool                   `json:"ParameterInSequence,omitempty"`    // Parameter place holder is in sequence. Default is false
+	Schema                 string                 `json:"Schema,omitempty"`                 // Schema for any of the database operations
+	InterpolateTables      *bool                  `json:"InterpolateTables,omitempty"`      // Enables the tables to be interpolated with schema
+	GroupID                *string                `json:"GroupID,omitempty"`                // GroupID allows us to get groups of connection
+	SequenceGenerator      *SequenceGeneratorInfo `json:"SequenceGenerator,omitempty"`      // Sequence generator configuration
+	StringEnclosingChar    *string                `json:"StringEnclosingChar,omitempty"`    // Gets or sets the character that encloses a string in the query
+	StringEscapeChar       *string                `json:"StringEscapeChar,omitempty"`       // Gets or Sets the character that escapes a reserved character such as the character that encloses a s string
+	IdentityQuery          *string                `json:"IdentityQuery,omitempty"`          // A query to get the generated identity
+	DateFunction           *string                `json:"DateFunction,omitempty"`           // The date function of each SQL database driver
+	UTCDateFunction        *string                `json:"UTCDateFunction,omitempty"`        // The UTC date function of each SQL database driver
+	MaxOpenConnection      *int                   `json:"MaxOpenConnection,omitempty"`      // Maximum open connection
+	MaxIdleConnection      *int                   `json:"MaxIdleConnection,omitempty"`      // Maximum idle connection
+	MaxConnectionLifetime  *int                   `json:"MaxConnectionLifetime,omitempty"`  // Max connection lifetime
+	Ping                   *bool                  `json:"Ping,omitempty"`                   // Ping connection
+	ReservedWordEscapeChar *string                `json:"ReservedWordEscapeChar,omitempty"` // Reserved word escape chars. For escaping with different opening and closing characters, just set to both. Example. `[]` for SQL server
+	KeywordMap             *[]DatabaseKeyword     `json:"KeywordMap,omitempty"`             // various keyword equivalents
 }
 
 // NotificationRecipient - notification standard recipients
@@ -225,43 +225,57 @@ func load(Source string) (*Configuration, error) {
 	// Default setting for database
 	for i, cd := range config.Databases {
 
-		if cd.StringEnclosingChar == "" {
-			cd.StringEnclosingChar = `'`
+		if cd.InterpolateTables == nil {
+			cd.InterpolateTables = new(bool)
+			*cd.InterpolateTables = true
 		}
 
-		if cd.StringEscapeChar == "" {
-			cd.StringEscapeChar = `\`
+		if cd.StringEnclosingChar == nil || *cd.StringEnclosingChar == "" {
+			cd.StringEnclosingChar = new(string)
+			*cd.StringEnclosingChar = `'`
+		}
+
+		if cd.StringEscapeChar == nil || *cd.StringEscapeChar == "" {
+			cd.StringEscapeChar = new(string)
+			*cd.StringEscapeChar = `\`
+		}
+
+		if cd.ReservedWordEscapeChar == nil || *cd.ReservedWordEscapeChar == "" {
+			cd.ReservedWordEscapeChar = new(string)
+			*cd.ReservedWordEscapeChar = `"`
 		}
 
 		if cd.ParameterPlaceholder == "" {
-			config.Databases[i].ParameterPlaceholder = `?`
-		}
-
-		if cd.ReservedWordEscapeChar == "" {
-			cd.ReservedWordEscapeChar = `"`
+			cd.ParameterPlaceholder = `?`
 		}
 
 		if cd.StorageType == "" {
-			config.Databases[i].StorageType = `SERVER`
+			cd.StorageType = `SERVER`
 		}
+
 		cd.StorageType = strings.ToUpper(cd.StorageType)
 
 		drivern := strings.ToLower(cd.DriverName)
 		if cd.StorageType == `SERVER` && (drivern == `sqlserver` || drivern == `mssql`) {
 
-			if config.Databases[i].IdentityQuery == "" {
-				config.Databases[i].IdentityQuery = `SELECT SCOPE_IDENTITY();`
+			if cd.IdentityQuery == nil || *cd.IdentityQuery == "" {
+				cd.IdentityQuery = new(string)
+				*cd.IdentityQuery = `SELECT SCOPE_IDENTITY();`
 			}
 
-			if config.Databases[i].UTCDateFunction == "" {
-				config.Databases[i].UTCDateFunction = `GETUTCDATE()`
+			if cd.UTCDateFunction == nil || *cd.UTCDateFunction == "" {
+				cd.UTCDateFunction = new(string)
+				*cd.UTCDateFunction = `GETUTCDATE()`
 			}
 
-			if config.Databases[i].DateFunction == "" {
-				config.Databases[i].DateFunction = `GETDATE()`
+			if cd.DateFunction == nil || *cd.DateFunction == "" {
+				cd.DateFunction = new(string)
+				*cd.DateFunction = `GETDATE()`
 			}
 
 		}
+
+		config.Databases[i] = cd
 	}
 
 	// check if there is a notification
@@ -294,7 +308,12 @@ func (c *Configuration) GetDatabaseInfo(ConnectionID string) *DatabaseInfo {
 func (c *Configuration) GetDatabaseInfoGroup(GroupID string) *[]DatabaseInfo {
 	dbgi := make([]DatabaseInfo, 0)
 	for _, v := range c.Databases {
-		if v.GroupID == GroupID {
+
+		if v.GroupID == nil {
+			continue
+		}
+
+		if *v.GroupID == GroupID {
 			dbgi = append(dbgi, v)
 		}
 	}

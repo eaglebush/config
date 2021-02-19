@@ -16,10 +16,14 @@ func TestLoadConfig(t *testing.T) {
 	config, _ := LoadConfig("config.mssql.json")
 
 	v := config.GetDatabaseInfo("DEFAULT")
-	km := v.KeywordMap[0]
 
-	fmt.Println(km.Key)
-	fmt.Println(km.Value)
+	var km []DatabaseKeyword
+	if v.KeywordMap != nil || len(*v.KeywordMap) > 0 {
+		km = *v.KeywordMap
+	}
+
+	fmt.Println(km[0].Key)
+	fmt.Println(km[0].Value)
 	vi := config.Flag("Joan").String()
 	fmt.Println(vi)
 
@@ -45,11 +49,11 @@ func TestLoadURLConfig(t *testing.T) {
 
 	v := config.GetDatabaseInfo("DEFAULT")
 
-	if len(v.KeywordMap) > 0 {
-		km := v.KeywordMap[0]
+	if v.KeywordMap != nil || len(*v.KeywordMap) > 0 {
+		km := *v.KeywordMap
 
-		fmt.Println(km.Key)
-		fmt.Println(km.Value)
+		fmt.Println(km[0].Key)
+		fmt.Println(km[0].Value)
 		vi := config.Flag("Joan").String()
 		fmt.Println(vi)
 
