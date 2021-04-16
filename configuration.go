@@ -16,10 +16,11 @@ type DatabaseKeyword struct {
 }
 
 // Endpoint - endpoint struct
-type Endpoint struct {
-	ID      string
-	Name    string
-	Address string
+type EndpointInfo struct {
+	ID      string  // Endpoint ID for quick access
+	Name    string  // Endpoint Name to show
+	GroupID *string // A group id to get certain endpoint set
+	Address string  // The absolute URL to the resource
 }
 
 // NotificationInfo - notification information on connecting to Notify API
@@ -114,7 +115,7 @@ type SourceInfo struct {
 
 // Configuration - for various configuration settings. This struct can be modified depending on the requirement.
 type Configuration struct {
-	APIEndpoints          []Endpoint         `json:"APIEndpoints,omitempty"`          // External API endpoints that this application can communicate
+	APIEndpoints          []EndpointInfo     `json:"APIEndpoints,omitempty"`          // External API endpoints that this application can communicate
 	APIKey                string             `json:"APIKey,omitempty"`                // Registration key
 	ApplicationID         string             `json:"ApplicationID,omitempty"`         // ID of this application
 	ApplicationName       string             `json:"ApplicationName,omitempty"`       // Name of this application
@@ -332,8 +333,8 @@ func (c *Configuration) GetDomainInfo(DomainName string) *DomainInfo {
 	return nil
 }
 
-// GetEndpoint - get an endpoint value
-func (c *Configuration) GetEndpoint(id ...string) string {
+// GetEndpointAddress - get an endpoint value
+func (c *Configuration) GetEndpointAddress(id ...string) string {
 	var k string
 	if len(id) > 0 {
 		k = strings.ToLower(id[0])
@@ -355,6 +356,48 @@ func (c *Configuration) GetEndpoint(id ...string) string {
 	}
 
 	return ""
+}
+
+// GetEndpointInfo - get an endpoint by id
+func (c *Configuration) GetEndpointInfo(id ...string) *EndpointInfo {
+	var k string
+	if len(id) > 0 {
+		k = strings.ToLower(id[0])
+	}
+
+	if k == "" {
+		k = strings.ToLower(c.DefaultEndpointID)
+	}
+
+	if k == "" {
+		return nil
+	}
+
+	for i := range c.APIEndpoints {
+		k2 := strings.TrimSpace(strings.ToLower(c.APIEndpoints[i].ID))
+		if k == k2 {
+			return &c.APIEndpoints[i]
+		}
+	}
+
+	return nil
+}
+
+// GetDatabaseInfoGroup - get database infos based on the group id
+func (c *Configuration) GetEndpointInfoGroup(GroupID string) *[]EndpointInfo {
+	ee := make([]EndpointInfo, 0)
+	for _, v := range c.APIEndpoints {
+
+		if v.GroupID == nil {
+			continue
+		}
+
+		if *v.GroupID == GroupID {
+			ee = append(ee, v)
+		}
+	}
+
+	return &ee
 }
 
 // GetNotificationInfo - get notification info
