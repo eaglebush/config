@@ -15,6 +15,13 @@ type DatabaseKeyword struct {
 	Flag
 }
 
+// APIKeys
+type APIKeyInfo struct {
+	ID   string
+	Name string
+	Key  string
+}
+
 // Endpoint - endpoint struct
 type EndpointInfo struct {
 	ID      string  // Endpoint ID for quick access
@@ -116,7 +123,7 @@ type SourceInfo struct {
 // Configuration - for various configuration settings. This struct can be modified depending on the requirement.
 type Configuration struct {
 	APIEndpoints          []EndpointInfo     `json:"APIEndpoints,omitempty"`          // External API endpoints that this application can communicate
-	APIKey                string             `json:"APIKey,omitempty"`                // Registration key
+	APIKeys               []APIKeyInfo       `json:"APIKeys,omitempty"`               // API Keys
 	ApplicationID         string             `json:"ApplicationID,omitempty"`         // ID of this application
 	ApplicationName       string             `json:"ApplicationName,omitempty"`       // Name of this application
 	ApplicationTheme      string             `json:"ApplicationTheme,omitempty"`      // Theme of this application
