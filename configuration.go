@@ -1,6 +1,7 @@
 package cfg
 
 import (
+	"eaglebush/stdutil"
 	"encoding/json"
 	"errors"
 	"io/ioutil"
@@ -122,34 +123,34 @@ type SourceInfo struct {
 
 // Configuration - for various configuration settings. This struct can be modified depending on the requirement.
 type Configuration struct {
-	APIEndpoints          []EndpointInfo     `json:"APIEndpoints,omitempty"`          // External API endpoints that this application can communicate
-	APIKeys               []APIKeyInfo       `json:"APIKeys,omitempty"`               // API Keys
-	ApplicationID         string             `json:"ApplicationID,omitempty"`         // ID of this application
-	ApplicationName       string             `json:"ApplicationName,omitempty"`       // Name of this application
-	ApplicationTheme      string             `json:"ApplicationTheme,omitempty"`      // Theme of this application
-	Cache                 CacheInfo          `json:"Cache,omitempty"`                 // Cache info of this application
-	CertificateFile       string             `json:"CertificateFile,omitempty"`       // Certificate file
-	CertificateKey        string             `json:"CertificateKey,omitempty"`        // Certificate private key
-	CookieDomain          string             `json:"CookieDomain,omitempty"`          // The domain of the cookie that this application will send
-	CrossOriginDomains    []string           `json:"CrossOriginDomains,omitempty"`    // Domains or endpoints that this application will allow
-	Databases             []DatabaseInfo     `json:"Databases,omitempty"`             // Configured databases for this application use
-	DefaultDatabaseID     string             `json:"DefaultDatabaseID,omitempty"`     // The default database id that this application will find on the database configuration
-	DefaultEndpointID     string             `json:"DefaultEndpointID,omitempty"`     // The default endpoint that this application will find on the API endpoints configuration
-	DefaultNotificationID string             `json:"DefaultNotificationID,omitempty"` // The default notification id that this application will find on the notification configuration
-	Domains               []DomainInfo       `json:"Domains,omitempty"`               // Configured domains for this application use
-	FileName              string             `json:"FileName,omitempty"`              // Filename of the current configuration
-	Flags                 []Flag             `json:"Flags,omitempty"`                 // Miscellaneous flags for this application use
-	HostInternalURL       string             `json:"HostInternalURL,omitempty"`       // The internal host URL that this application will use to set returned resources and assets
-	HostExternalURL       string             `json:"HostExternalURL,omitempty"`       // The external host URL that this application will use to set returned resources and assets
-	HostPort              int                `json:"HostPort,omitempty"`              // The network port for the application
-	JWTSecret             string             `json:"JWTSecret,omitempty"`             // Application wide JSON Web Token (JWT) secret
-	LicenseSerial         string             `json:"LicenseSerial,omitempty"`         // License serial of this application
-	Notifications         []NotificationInfo `json:"Notifications,omitempty"`         // Configured notifications for this application use
-	Queue                 QueueInfo          `json:"Queue,omitempty"`                 // Queue or message queue
-	ReadTimeout           int                `json:"ReadTimeout,omitempty"`           // Default network timeout setting for reading data uploaded to this application
-	Secure                bool               `json:"Secure,omitempty"`                // Flags if secure
-	Sources               []SourceInfo       `json:"Sources,omitempty"`               // Folder sources
-	WriteTimeout          int                `json:"WriteTimeout,omitempty"`          // Default network timeout setting for writing data downloaded from this application
+	APIEndpoints          *[]EndpointInfo     `json:"APIEndpoints,omitempty"`          // External API endpoints that this application can communicate
+	APIKeys               *[]APIKeyInfo       `json:"APIKeys,omitempty"`               // API Keys
+	ApplicationID         *string             `json:"ApplicationID,omitempty"`         // ID of this application
+	ApplicationName       *string             `json:"ApplicationName,omitempty"`       // Name of this application
+	ApplicationTheme      *string             `json:"ApplicationTheme,omitempty"`      // Theme of this application
+	Cache                 *CacheInfo          `json:"Cache,omitempty"`                 // Cache info of this application
+	CertificateFile       *string             `json:"CertificateFile,omitempty"`       // Certificate file
+	CertificateKey        *string             `json:"CertificateKey,omitempty"`        // Certificate private key
+	CookieDomain          *string             `json:"CookieDomain,omitempty"`          // The domain of the cookie that this application will send
+	CrossOriginDomains    *[]string           `json:"CrossOriginDomains,omitempty"`    // Domains or endpoints that this application will allow
+	Databases             *[]DatabaseInfo     `json:"Databases,omitempty"`             // Configured databases for this application use
+	DefaultDatabaseID     *string             `json:"DefaultDatabaseID,omitempty"`     // The default database id that this application will find on the database configuration
+	DefaultEndpointID     *string             `json:"DefaultEndpointID,omitempty"`     // The default endpoint that this application will find on the API endpoints configuration
+	DefaultNotificationID *string             `json:"DefaultNotificationID,omitempty"` // The default notification id that this application will find on the notification configuration
+	Domains               *[]DomainInfo       `json:"Domains,omitempty"`               // Configured domains for this application use
+	FileName              string              `json:"FileName,omitempty"`              // Filename of the current configuration
+	Flags                 *[]Flag             `json:"Flags,omitempty"`                 // Miscellaneous flags for this application use
+	HostInternalURL       *string             `json:"HostInternalURL,omitempty"`       // The internal host URL that this application will use to set returned resources and assets
+	HostExternalURL       *string             `json:"HostExternalURL,omitempty"`       // The external host URL that this application will use to set returned resources and assets
+	HostPort              *int                `json:"HostPort,omitempty"`              // The network port for the application
+	JWTSecret             *string             `json:"JWTSecret,omitempty"`             // Application wide JSON Web Token (JWT) secret
+	LicenseSerial         *string             `json:"LicenseSerial,omitempty"`         // License serial of this application
+	Notifications         *[]NotificationInfo `json:"Notifications,omitempty"`         // Configured notifications for this application use
+	Queue                 *QueueInfo          `json:"Queue,omitempty"`                 // Queue or message queue
+	ReadTimeout           *int                `json:"ReadTimeout,omitempty"`           // Default network timeout setting for reading data uploaded to this application
+	Secure                *bool               `json:"Secure,omitempty"`                // Flags if secure
+	Sources               *[]SourceInfo       `json:"Sources,omitempty"`               // Folder sources
+	WriteTimeout          *int                `json:"WriteTimeout,omitempty"`          // Default network timeout setting for writing data downloaded from this application
 	errorText             string
 }
 
@@ -218,84 +219,95 @@ func load(Source string) (*Configuration, error) {
 		return nil, err
 	}
 
-	if config.DefaultDatabaseID == "" {
-		config.DefaultDatabaseID = def
+	if config.DefaultDatabaseID == nil || *config.DefaultDatabaseID == "" {
+		config.DefaultDatabaseID = stdutil.NewString(def)
 	}
 
-	if config.DefaultEndpointID == "" {
-		config.DefaultEndpointID = def
+	if config.DefaultEndpointID == nil || *config.DefaultEndpointID == "" {
+		config.DefaultEndpointID = stdutil.NewString(def)
 	}
 
-	if config.DefaultNotificationID == "" {
-		config.DefaultNotificationID = def
+	if config.DefaultNotificationID == nil || *config.DefaultNotificationID == "" {
+		config.DefaultNotificationID = stdutil.NewString(def)
 	}
 
 	// Default setting for database
-	for i, cd := range config.Databases {
+	if config.Databases != nil {
+		dbs := *config.Databases
+		for i, cd := range dbs {
 
-		if cd.InterpolateTables == nil {
-			cd.InterpolateTables = new(bool)
-			*cd.InterpolateTables = true
-		}
-
-		if cd.StringEnclosingChar == nil || *cd.StringEnclosingChar == "" {
-			cd.StringEnclosingChar = new(string)
-			*cd.StringEnclosingChar = `'`
-		}
-
-		if cd.StringEscapeChar == nil || *cd.StringEscapeChar == "" {
-			cd.StringEscapeChar = new(string)
-			*cd.StringEscapeChar = `\`
-		}
-
-		if cd.ReservedWordEscapeChar == nil || *cd.ReservedWordEscapeChar == "" {
-			cd.ReservedWordEscapeChar = new(string)
-			*cd.ReservedWordEscapeChar = `"`
-		}
-
-		if cd.ParameterPlaceholder == "" {
-			cd.ParameterPlaceholder = `?`
-		}
-
-		if cd.StorageType == "" {
-			cd.StorageType = `SERVER`
-		}
-
-		cd.StorageType = strings.ToUpper(cd.StorageType)
-
-		drivern := strings.ToLower(cd.DriverName)
-		if cd.StorageType == `SERVER` && (drivern == `sqlserver` || drivern == `mssql`) {
-
-			if cd.IdentityQuery == nil || *cd.IdentityQuery == "" {
-				cd.IdentityQuery = new(string)
-				*cd.IdentityQuery = `SELECT SCOPE_IDENTITY();`
+			if cd.InterpolateTables == nil {
+				cd.InterpolateTables = new(bool)
+				*cd.InterpolateTables = true
 			}
 
-			if cd.UTCDateFunction == nil || *cd.UTCDateFunction == "" {
-				cd.UTCDateFunction = new(string)
-				*cd.UTCDateFunction = `GETUTCDATE()`
+			if cd.StringEnclosingChar == nil || *cd.StringEnclosingChar == "" {
+				cd.StringEnclosingChar = new(string)
+				*cd.StringEnclosingChar = `'`
 			}
 
-			if cd.DateFunction == nil || *cd.DateFunction == "" {
-				cd.DateFunction = new(string)
-				*cd.DateFunction = `GETDATE()`
+			if cd.StringEscapeChar == nil || *cd.StringEscapeChar == "" {
+				cd.StringEscapeChar = new(string)
+				*cd.StringEscapeChar = `\`
 			}
 
+			if cd.ReservedWordEscapeChar == nil || *cd.ReservedWordEscapeChar == "" {
+				cd.ReservedWordEscapeChar = new(string)
+				*cd.ReservedWordEscapeChar = `"`
+			}
+
+			if cd.ParameterPlaceholder == "" {
+				cd.ParameterPlaceholder = `?`
+			}
+
+			if cd.StorageType == "" {
+				cd.StorageType = `SERVER`
+			}
+
+			cd.StorageType = strings.ToUpper(cd.StorageType)
+
+			drivern := strings.ToLower(cd.DriverName)
+			if cd.StorageType == `SERVER` && (drivern == `sqlserver` || drivern == `mssql`) {
+
+				if cd.IdentityQuery == nil || *cd.IdentityQuery == "" {
+					cd.IdentityQuery = new(string)
+					*cd.IdentityQuery = `SELECT SCOPE_IDENTITY();`
+				}
+
+				if cd.UTCDateFunction == nil || *cd.UTCDateFunction == "" {
+					cd.UTCDateFunction = new(string)
+					*cd.UTCDateFunction = `GETUTCDATE()`
+				}
+
+				if cd.DateFunction == nil || *cd.DateFunction == "" {
+					cd.DateFunction = new(string)
+					*cd.DateFunction = `GETDATE()`
+				}
+
+			}
+
+			dbs[i] = cd
 		}
 
-		config.Databases[i] = cd
+		config.Databases = &dbs
 	}
 
 	// check if there is a notification
 	defnum := ""
-	for i, cn := range config.Notifications {
-		if i > 0 {
-			defnum = strconv.Itoa(i)
+	if config.Notifications != nil {
+		nfs := *config.Notifications
+
+		for i, cn := range nfs {
+			if i > 0 {
+				defnum = strconv.Itoa(i)
+			}
+
+			if cn.ID == "" {
+				nfs[i].ID = def + defnum
+			}
 		}
 
-		if cn.ID == "" {
-			config.Notifications[i].ID = def + defnum
-		}
+		config.Notifications = &nfs
 	}
 
 	return config, nil
@@ -303,7 +315,12 @@ func load(Source string) (*Configuration, error) {
 
 // GetDatabaseInfo - get a database info by ID
 func (c *Configuration) GetDatabaseInfo(ConnectionID string) *DatabaseInfo {
-	for _, v := range c.Databases {
+
+	if c.Databases == nil {
+		return &DatabaseInfo{}
+	}
+
+	for _, v := range *c.Databases {
 		if v.ID == ConnectionID {
 			return &v
 		}
@@ -314,8 +331,14 @@ func (c *Configuration) GetDatabaseInfo(ConnectionID string) *DatabaseInfo {
 
 // GetDatabaseInfoGroup - get database infos based on the group id
 func (c *Configuration) GetDatabaseInfoGroup(GroupID string) *[]DatabaseInfo {
+
 	dbgi := make([]DatabaseInfo, 0)
-	for _, v := range c.Databases {
+
+	if c.Databases == nil {
+		return &dbgi
+	}
+
+	for _, v := range *c.Databases {
 
 		if v.GroupID == nil {
 			continue
@@ -331,7 +354,12 @@ func (c *Configuration) GetDatabaseInfoGroup(GroupID string) *[]DatabaseInfo {
 
 // GetDomainInfo - get a domain info by name
 func (c *Configuration) GetDomainInfo(DomainName string) *DomainInfo {
-	for _, v := range c.Domains {
+
+	if c.Domains == nil {
+		return &DomainInfo{}
+	}
+
+	for _, v := range *c.Domains {
 		if v.Name == DomainName {
 			return &v
 		}
@@ -342,23 +370,30 @@ func (c *Configuration) GetDomainInfo(DomainName string) *DomainInfo {
 
 // GetEndpointAddress - get an endpoint value
 func (c *Configuration) GetEndpointAddress(id ...string) string {
+
+	if c.APIEndpoints != nil {
+		return ""
+	}
+
 	var k string
 	if len(id) > 0 {
 		k = strings.ToLower(id[0])
 	}
 
 	if k == "" {
-		k = strings.ToLower(c.DefaultEndpointID)
+		k = strings.ToLower(*c.DefaultEndpointID)
 	}
 
 	if k == "" {
 		return ""
 	}
 
-	for i := range c.APIEndpoints {
-		k2 := strings.TrimSpace(strings.ToLower(c.APIEndpoints[i].ID))
+	eps := *c.APIEndpoints
+
+	for i := range eps {
+		k2 := strings.TrimSpace(strings.ToLower(eps[i].ID))
 		if k == k2 {
-			return c.APIEndpoints[i].Address
+			return eps[i].Address
 		}
 	}
 
@@ -367,23 +402,30 @@ func (c *Configuration) GetEndpointAddress(id ...string) string {
 
 // GetEndpointInfo - get an endpoint by id
 func (c *Configuration) GetEndpointInfo(id ...string) *EndpointInfo {
+
+	if c.APIEndpoints != nil {
+		return nil
+	}
+
 	var k string
 	if len(id) > 0 {
 		k = strings.ToLower(id[0])
 	}
 
 	if k == "" {
-		k = strings.ToLower(c.DefaultEndpointID)
+		k = strings.ToLower(*c.DefaultEndpointID)
 	}
 
 	if k == "" {
 		return nil
 	}
 
-	for i := range c.APIEndpoints {
-		k2 := strings.TrimSpace(strings.ToLower(c.APIEndpoints[i].ID))
+	eps := *c.APIEndpoints
+
+	for i := range eps {
+		k2 := strings.TrimSpace(strings.ToLower(eps[i].ID))
 		if k == k2 {
-			return &c.APIEndpoints[i]
+			return &eps[i]
 		}
 	}
 
@@ -392,8 +434,16 @@ func (c *Configuration) GetEndpointInfo(id ...string) *EndpointInfo {
 
 // GetDatabaseInfoGroup - get database infos based on the group id
 func (c *Configuration) GetEndpointInfoGroup(GroupID string) *[]EndpointInfo {
+
 	ee := make([]EndpointInfo, 0)
-	for _, v := range c.APIEndpoints {
+
+	if c.APIEndpoints != nil {
+		return &ee
+	}
+
+	eps := *c.APIEndpoints
+
+	for _, v := range eps {
 
 		if v.GroupID == nil {
 			continue
@@ -409,7 +459,12 @@ func (c *Configuration) GetEndpointInfoGroup(GroupID string) *[]EndpointInfo {
 
 // GetNotificationInfo - get notification info
 func (c *Configuration) GetNotificationInfo(id ...string) (NotificationInfo, error) {
+
 	ni := NotificationInfo{}
+
+	if c.Notifications == nil {
+		return ni, nil
+	}
 
 	var k string
 	if len(id) > 0 {
@@ -417,17 +472,19 @@ func (c *Configuration) GetNotificationInfo(id ...string) (NotificationInfo, err
 	}
 
 	if k == "" {
-		k = strings.ToLower(c.DefaultNotificationID)
+		k = strings.ToLower(*c.DefaultNotificationID)
 	}
 
-	if len(c.Notifications) == 0 {
+	nfs := *c.Notifications
+
+	if len(nfs) == 0 {
 		return ni, errors.New("No notification configuration could be found")
 	}
 
-	for i := range c.Notifications {
-		k2 := strings.TrimSpace(strings.ToLower(c.Notifications[i].ID))
+	for i := range nfs {
+		k2 := strings.TrimSpace(strings.ToLower(nfs[i].ID))
 		if k == k2 {
-			return c.Notifications[i], nil
+			return nfs[i], nil
 		}
 	}
 
@@ -436,7 +493,14 @@ func (c *Configuration) GetNotificationInfo(id ...string) (NotificationInfo, err
 
 // GetSourceInfo - get source by id
 func (c *Configuration) GetSourceInfo(SourceID string) (*SourceInfo, error) {
-	for _, v := range c.Sources {
+
+	if c.Sources == nil {
+		return nil, nil
+	}
+
+	srcs := *c.Sources
+
+	for _, v := range srcs {
 		if v.ID == SourceID {
 			return &v, nil
 		}

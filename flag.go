@@ -13,11 +13,18 @@ type Flag struct {
 
 // Flag - get a flag value
 func (c *Configuration) Flag(key string) Flag {
+
 	k := strings.ToLower(key)
 
-	for i := range c.Flags {
-		if k2 := strings.TrimSpace(strings.ToLower(c.Flags[i].Key)); k == k2 {
-			return c.Flags[i]
+	if c.Flags == nil {
+		return Flag{}
+	}
+
+	flgs := *c.Flags
+
+	for i := range flgs {
+		if k2 := strings.TrimSpace(strings.ToLower(flgs[i].Key)); k == k2 {
+			return flgs[i]
 		}
 	}
 
