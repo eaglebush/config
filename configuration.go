@@ -232,6 +232,14 @@ func load(Source string) (*Configuration, error) {
 		config.DefaultNotificationID = stdutil.NewString(def)
 	}
 
+	if config.CookieDomain == nil {
+		config.CookieDomain = stdutil.NewString(`localhost`)
+	}
+
+	if config.JWTSecret == nil {
+		config.JWTSecret = stdutil.NewString(`defaultsecretkey`)
+	}
+
 	// Default setting for database
 	if config.Databases != nil {
 		dbs := *config.Databases
