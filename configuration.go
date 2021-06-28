@@ -1,7 +1,6 @@
 package cfg
 
 import (
-	"eaglebush/stdutil"
 	"encoding/json"
 	"errors"
 	"io/ioutil"
@@ -9,6 +8,8 @@ import (
 	"os"
 	"strconv"
 	"strings"
+
+	"github.com/eaglebush/stdutil"
 )
 
 // DatabaseKeyword - struct for database keywords
