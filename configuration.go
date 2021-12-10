@@ -74,10 +74,11 @@ type SequenceGeneratorInfo struct {
 
 //DatabaseInfo - database configuration setting
 type DatabaseInfo struct {
-	ID                     string                 `json:"ID"`                               // A unique ID that will identify the connection to a database
-	ConnectionString       string                 `json:"ConnectionString"`                 // ConnectionString specific to the database
-	DriverName             string                 `json:"DriverName"`                       // DriverName needs to be specified depending on the driver id used by the Go database driver
-	StorageType            string                 `json:"StorageType"`                      // FILE for filebased database such as Access, SQlite or LocalDB. SERVER for SQL Server, MySQL etc
+	ID                     string                 `json:"ID,omitempty"`                     // A unique ID that will identify the connection to a database
+	ConnectionString       string                 `json:"ConnectionString,omitempty"`       // ConnectionString specific to the database
+	DriverName             string                 `json:"DriverName,omitempty"`             // DriverName needs to be specified depending on the driver id used by the Go database driver
+	StorageType            string                 `json:"StorageType,omitempty"`            // FILE for filebased database such as Access, SQlite or LocalDB. SERVER for SQL Server, MySQL etc
+	HelperID               string                 `json:"HelperID,omitempty"`               // When using github.com/NarsilWorks-Inc/datahelperlite, this is needed in the configuration file
 	ParameterPlaceholder   string                 `json:"ParameterPlaceholder,omitempty"`   // Parameter place holder for prepared statements. Default is '?'
 	ParameterInSequence    bool                   `json:"ParameterInSequence,omitempty"`    // Parameter place holder is in sequence. Default is false
 	Schema                 string                 `json:"Schema,omitempty"`                 // Schema for any of the database operations
@@ -106,10 +107,10 @@ type NotificationRecipient struct {
 
 // QueueInfo - queue info connector
 type QueueInfo struct {
-	ID            string `json:"ID,omitempty"`            // ID of the setting
-	ServerAddress string `json:"ServerAddress,omitempty"` // Queue server address
-	Cluster       string `json:"Cluster,omitempty"`       // Cluster name
-	ClientID      string `json:"ClientID,omitempty"`      // ClientID of the service
+	ID                 string   `json:"ID,omitempty"`                 // ID of the setting
+	ServerAddressGroup []string `json:"ServerAddressGroup,omitempty"` // Queue server address group
+	Cluster            string   `json:"Cluster,omitempty"`            // Cluster name
+	ClientID           string   `json:"ClientID,omitempty"`           // ClientID of the service
 }
 
 // SourceInfo - file sources for configuration
@@ -207,7 +208,7 @@ func load(Source string) (*Configuration, error) {
 	}
 
 	if len(b) == 0 {
-		err = errors.New(`No data from source for configuration`)
+		err = errors.New(`no data from source for configuration`)
 		config.errorText = err.Error()
 		return config, err
 	}
@@ -487,7 +488,7 @@ func (c *Configuration) GetNotificationInfo(id ...string) (NotificationInfo, err
 	nfs := *c.Notifications
 
 	if len(nfs) == 0 {
-		return ni, errors.New("No notification configuration could be found")
+		return ni, errors.New("no notification configuration could be found")
 	}
 
 	for i := range nfs {
@@ -497,7 +498,7 @@ func (c *Configuration) GetNotificationInfo(id ...string) (NotificationInfo, err
 		}
 	}
 
-	return ni, errors.New("Notification could not be found")
+	return ni, errors.New("notification could not be found")
 }
 
 // GetSourceInfo - get source by id
