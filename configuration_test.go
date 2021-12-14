@@ -1,10 +1,11 @@
 package cfg
 
 import (
-	"eaglebush/stdutil"
 	"encoding/json"
 	"fmt"
 	"testing"
+
+	"github.com/eaglebush/stdutil"
 )
 
 type EmbeddedConfiguration struct {
