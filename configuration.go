@@ -19,17 +19,19 @@ type DatabaseKeyword struct {
 
 // APIKeys
 type APIKeyInfo struct {
-	ID   string
-	Name string
-	Key  string
+	ID    string
+	Name  string
+	Key   string
+	Token *string
 }
 
 // Endpoint - endpoint struct
 type EndpointInfo struct {
 	ID      string  // Endpoint ID for quick access
 	Name    string  // Endpoint Name to show
-	GroupID *string // A group id to get certain endpoint set
 	Address string  // The absolute URL to the resource
+	GroupID *string // A group id to get certain endpoint set
+	Token   *string
 }
 
 // NotificationInfo - notification information on connecting to Notify API
