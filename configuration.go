@@ -95,6 +95,7 @@ type DatabaseInfo struct {
 	MaxOpenConnection      *int                   `json:"MaxOpenConnection,omitempty"`      // Maximum open connection
 	MaxIdleConnection      *int                   `json:"MaxIdleConnection,omitempty"`      // Maximum idle connection
 	MaxConnectionLifetime  *int                   `json:"MaxConnectionLifetime,omitempty"`  // Max connection lifetime
+	MaxConnectionIdleTime  *int                   `json:"MaxConnectionIdleTime,omitempty"`  // Max idle connection lifetime
 	Ping                   *bool                  `json:"Ping,omitempty"`                   // Ping connection
 	ReservedWordEscapeChar *string                `json:"ReservedWordEscapeChar,omitempty"` // Reserved word escape chars. For escaping with different opening and closing characters, just set to both. Example. `[]` for SQL server
 	KeywordMap             *[]DatabaseKeyword     `json:"KeywordMap,omitempty"`             // various keyword equivalents
