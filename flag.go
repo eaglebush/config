@@ -14,8 +14,6 @@ type Flag struct {
 // Flag - get a flag value
 func (c *Configuration) Flag(key string) Flag {
 
-	k := strings.ToLower(key)
-
 	if c.Flags == nil {
 		return Flag{}
 	}
@@ -23,7 +21,7 @@ func (c *Configuration) Flag(key string) Flag {
 	flgs := *c.Flags
 
 	for i := range flgs {
-		if k2 := strings.TrimSpace(strings.ToLower(flgs[i].Key)); k == k2 {
+		if strings.EqualFold(key, flgs[i].Key) {
 			return flgs[i]
 		}
 	}
@@ -56,7 +54,21 @@ func (f Flag) Int() int {
 	return vi
 }
 
+// Float - return an float from flag value
+func (f Flag) Float() float32 {
+	v := strings.TrimSpace(f.Value)
+	vi, _ := strconv.ParseFloat(v, 32)
+	return float32(vi)
+}
+
+// Float - return an float from flag value
+func (f Flag) Float64() float64 {
+	v := strings.TrimSpace(f.Value)
+	vi, _ := strconv.ParseFloat(v, 64)
+	return vi
+}
+
 // String - return a string from flag value
 func (f Flag) String() string {
-	return strings.TrimSpace(f.Value)
+	return f.Value
 }

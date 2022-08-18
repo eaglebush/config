@@ -4,8 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"testing"
-
-	"github.com/eaglebush/stdutil"
 )
 
 type EmbeddedConfiguration struct {
@@ -35,7 +33,7 @@ func TestLoadConfig(t *testing.T) {
 
 	fmt.Printf("%v+", string(b))
 
-	config.LicenseSerial = stdutil.NewString("12345678")
+	config.LicenseSerial = newString("12345678")
 
 	// ok := config.Save()
 	// if !ok {
@@ -67,7 +65,7 @@ func TestLoadURLConfig(t *testing.T) {
 
 	fmt.Printf("%v+", string(b))
 
-	config.LicenseSerial = stdutil.NewString("12345678")
+	config.LicenseSerial = newString("12345678")
 
 	// ok := config.Save()
 	// if !ok {

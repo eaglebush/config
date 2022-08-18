@@ -3,13 +3,11 @@ package cfg
 import (
 	"encoding/json"
 	"errors"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"os"
 	"strconv"
 	"strings"
-
-	"github.com/eaglebush/stdutil"
 )
 
 // DatabaseKeyword - struct for database keywords
@@ -67,14 +65,14 @@ type DomainInfo struct {
 	Filter             string
 }
 
-//SequenceGeneratorInfo - sequence generator query
+// SequenceGeneratorInfo - sequence generator query
 type SequenceGeneratorInfo struct {
 	UpsertQuery     string
 	ResultQuery     string
 	NamePlaceHolder string
 }
 
-//DatabaseInfo - database configuration setting
+// DatabaseInfo - database configuration setting
 type DatabaseInfo struct {
 	ID                     string                 `json:"ID,omitempty"`                     // A unique ID that will identify the connection to a database
 	ConnectionString       string                 `json:"ConnectionString,omitempty"`       // ConnectionString specific to the database
@@ -183,7 +181,7 @@ func load(Source string) (*Configuration, error) {
 	}
 
 	if islocfile {
-		if b, err = ioutil.ReadFile(Source); err != nil {
+		if b, err = os.ReadFile(Source); err != nil {
 			config.errorText = err.Error()
 			return config, err
 		}
@@ -198,7 +196,7 @@ func load(Source string) (*Configuration, error) {
 			}
 			defer nr.Body.Close()
 
-			ob, err = ioutil.ReadAll(nr.Body)
+			ob, err = io.ReadAll(nr.Body)
 			if err != nil {
 				return ob, err
 			}
@@ -225,23 +223,23 @@ func load(Source string) (*Configuration, error) {
 	}
 
 	if config.DefaultDatabaseID == nil || *config.DefaultDatabaseID == "" {
-		config.DefaultDatabaseID = stdutil.NewString(def)
+		config.DefaultDatabaseID = newString(def)
 	}
 
 	if config.DefaultEndpointID == nil || *config.DefaultEndpointID == "" {
-		config.DefaultEndpointID = stdutil.NewString(def)
+		config.DefaultEndpointID = newString(def)
 	}
 
 	if config.DefaultNotificationID == nil || *config.DefaultNotificationID == "" {
-		config.DefaultNotificationID = stdutil.NewString(def)
+		config.DefaultNotificationID = newString(def)
 	}
 
 	if config.CookieDomain == nil {
-		config.CookieDomain = stdutil.NewString(`localhost`)
+		config.CookieDomain = newString(`localhost`)
 	}
 
 	if config.JWTSecret == nil {
-		config.JWTSecret = stdutil.NewString(`defaultsecretkey`)
+		config.JWTSecret = newString(`defaultsecretkey`)
 	}
 
 	// Default setting for database
@@ -384,7 +382,7 @@ func (c *Configuration) GetDomainInfo(DomainName string) *DomainInfo {
 // GetEndpointAddress - get an endpoint value
 func (c *Configuration) GetEndpointAddress(id ...string) string {
 
-	if c.APIEndpoints != nil {
+	if c.APIEndpoints == nil {
 		return ""
 	}
 
@@ -416,7 +414,7 @@ func (c *Configuration) GetEndpointAddress(id ...string) string {
 // GetEndpointInfo - get an endpoint by id
 func (c *Configuration) GetEndpointInfo(id ...string) *EndpointInfo {
 
-	if c.APIEndpoints != nil {
+	if c.APIEndpoints == nil {
 		return nil
 	}
 
@@ -450,7 +448,7 @@ func (c *Configuration) GetEndpointInfoGroup(GroupID string) *[]EndpointInfo {
 
 	ee := make([]EndpointInfo, 0)
 
-	if c.APIEndpoints != nil {
+	if c.APIEndpoints == nil {
 		return &ee
 	}
 
@@ -533,7 +531,7 @@ func (c *Configuration) Save() bool {
 		return false
 	}
 
-	if err = ioutil.WriteFile(c.FileName, b, os.ModePerm); err != nil {
+	if err = os.WriteFile(c.FileName, b, os.ModePerm); err != nil {
 		c.errorText = err.Error()
 		return false
 	}
@@ -549,4 +547,10 @@ func (c *Configuration) Reload() error {
 // LastErrorText - gets the last error
 func (c *Configuration) LastErrorText() string {
 	return c.errorText
+}
+
+func newString(initial string) (init *string) {
+	init = new(string)
+	*init = initial
+	return
 }
