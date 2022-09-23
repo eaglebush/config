@@ -549,6 +549,30 @@ func (c *Configuration) LastErrorText() string {
 	return c.errorText
 }
 
+// Flag - get a flag value
+func (c *Configuration) Flag(key string) Flag {
+
+	ret := Flag{
+		Key:   key,
+		Value: nil,
+	}
+
+	if c.Flags == nil {
+		return ret
+	}
+
+	// get flags to loop from
+	flgs := *c.Flags
+	for i := range flgs {
+		if strings.EqualFold(key, flgs[i].Key) {
+			ret = flgs[i]
+			break
+		}
+	}
+
+	return ret
+}
+
 func newString(initial string) (init *string) {
 	init = new(string)
 	*init = initial
