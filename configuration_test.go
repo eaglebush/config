@@ -13,7 +13,11 @@ type EmbeddedConfiguration struct {
 }
 
 func TestLoadConfig(t *testing.T) {
-	config, _ := LoadConfig("config.mssql.json")
+	config, err := LoadConfig("config.mssql.json")
+	if err != nil {
+		t.Fail()
+		t.Fatalf(`Error %v`, err)
+	}
 
 	v := config.GetDatabaseInfo("DEFAULT")
 
@@ -33,7 +37,7 @@ func TestLoadConfig(t *testing.T) {
 
 	fmt.Printf("%v+", string(b))
 
-	config.LicenseSerial = newString("12345678")
+	config.LicenseSerial = new_string("12345678")
 
 	// ok := config.Save()
 	// if !ok {
@@ -45,6 +49,7 @@ func TestLoadURLConfig(t *testing.T) {
 	config, err := LoadConfig("http://valkyrie.vdimdci.com.ph/xtest/config.json")
 	if err != nil {
 		t.Fail()
+		t.Fatalf(`Error %v`, err)
 	}
 
 	v := config.GetDatabaseInfo("DEFAULT")
@@ -65,7 +70,7 @@ func TestLoadURLConfig(t *testing.T) {
 
 	fmt.Printf("%v+", string(b))
 
-	config.LicenseSerial = newString("12345678")
+	config.LicenseSerial = new_string("12345678")
 
 	// ok := config.Save()
 	// if !ok {

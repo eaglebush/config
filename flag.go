@@ -7,29 +7,24 @@ import (
 
 // Flag - dynamic flags structure
 type Flag struct {
-	Key   string
-	Value *string
+	Key   string  `json:"key,omitempty"`
+	Value *string `json:"value,omitempty"`
 }
 
 // Bool - return a boolean from flag value
 func (f Flag) Bool() *bool {
-
-	var ret *bool
-
 	if f.Value == nil {
-		return ret
+		return nil
 	}
 
 	v := strings.TrimSpace(*f.Value)
 	v = strings.ToLower(v)
-	ret = new(bool)
-
+	ret := new(bool)
 	switch v {
 	case "1", "on", "yes", "enabled", "true":
 		*ret = true
 		return ret
 	}
-
 	return ret
 }
 
@@ -88,6 +83,5 @@ func (f Flag) String() *string {
 	if f.Value == nil {
 		return nil
 	}
-
 	return f.Value
 }

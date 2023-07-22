@@ -47,14 +47,28 @@
 			"StringEscapeChar": "'",
 			"ReservedWordEscapeChar":"[]",
 			"KeywordMap": [
-				{
-					"Key": "SAVEPOINT_START",
-					"Value": "SAVE TRANSACTION"
-				},
-				{
-					"Key": "SAVEPOINT_RELEASE",
-					"Value": "ROLLBACK TRANSACTION"
-				}
+				{ "Key": "SAVEPOINT_START", "Value": "SAVE TRANSACTION"	},
+				{ "Key": "SAVEPOINT_RELEASE", "Value": "ROLLBACK TRANSACTION" }
+			]
+		}
+	],
+	"Directories": [
+		{
+			"GroupID" : "IMPORT",
+			"Description": "Imported files directory",
+			"Items":
+			[
+				{ "Key": "grpperm", "Value": "/usr/local/services/appshub/auth/api/uploads/grpperm" },
+				{ "Key": "usrgrping", "Value": "/usr/local/services/appshub/auth/api/uploads/usrgrping" },
+				{ "Key": "user", "Value": "/usr/local/services/appshub/auth/api/uploads/user" }
+			]
+		},
+		{
+			"GroupID" : "IMAGE",
+			"Description": "Image upload directory",
+			"Items":
+			[
+				{ "Key": "profile", "Value": "/usr/local/services/appshub/auth/api/uploads" }
 			]
 		}
 	],
@@ -82,10 +96,21 @@
 			"Recipients": [
 				{
 					"ID": "test",
-					"ContactName": "Test User",
-					"ContactAddress": "testuser@yahoo.com"
+					"Name": "Test User",
+					"Address": "testuser@yahoo.com"
 				}
 			]
+		}
+	],
+	"Sources": [
+		{
+			"ID": "order",
+			"Type":"ORDER",
+			"source": "/usr/bin",
+			"relative": true,
+			"Error": "/error",
+			"Success" :"/archive",
+			"Extension":".csv"
 		}
 	],
 	"Flags": [

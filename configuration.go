@@ -15,12 +15,19 @@ type DatabaseKeyword struct {
 	Flag
 }
 
-// APIKeys
+// APIKeyInfo contains an API info
 type APIKeyInfo struct {
 	ID    string
 	Name  string
 	Key   string
 	Token *string
+}
+
+// DirectoryInfo contains a directory info
+type DirectoryInfo struct {
+	GroupID     string
+	Description string
+	Items       []Flag
 }
 
 // Endpoint - endpoint struct
@@ -74,6 +81,7 @@ type SequenceGeneratorInfo struct {
 
 // DatabaseInfo - database configuration setting
 type DatabaseInfo struct {
+	GroupID                *string                `json:"GroupID,omitempty"`                // GroupID allows us to get groups of connection
 	ID                     string                 `json:"ID,omitempty"`                     // A unique ID that will identify the connection to a database
 	ConnectionString       string                 `json:"ConnectionString,omitempty"`       // ConnectionString specific to the database
 	DriverName             string                 `json:"DriverName,omitempty"`             // DriverName needs to be specified depending on the driver id used by the Go database driver
@@ -83,7 +91,6 @@ type DatabaseInfo struct {
 	ParameterInSequence    bool                   `json:"ParameterInSequence,omitempty"`    // Parameter place holder is in sequence. Default is false
 	Schema                 string                 `json:"Schema,omitempty"`                 // Schema for any of the database operations
 	InterpolateTables      *bool                  `json:"InterpolateTables,omitempty"`      // Enables the tables to be interpolated with schema
-	GroupID                *string                `json:"GroupID,omitempty"`                // GroupID allows us to get groups of connection
 	SequenceGenerator      *SequenceGeneratorInfo `json:"SequenceGenerator,omitempty"`      // Sequence generator configuration
 	StringEnclosingChar    *string                `json:"StringEnclosingChar,omitempty"`    // Gets or sets the character that encloses a string in the query
 	StringEscapeChar       *string                `json:"StringEscapeChar,omitempty"`       // Gets or Sets the character that escapes a reserved character such as the character that encloses a s string
@@ -101,9 +108,9 @@ type DatabaseInfo struct {
 
 // NotificationRecipient - notification standard recipients
 type NotificationRecipient struct {
-	ID             string
-	ContactName    string
-	ContactAddress string
+	ID      string
+	Name    string
+	Address string
 }
 
 // QueueInfo - queue info connector
@@ -116,12 +123,13 @@ type QueueInfo struct {
 
 // SourceInfo - file sources for configuration
 type SourceInfo struct {
-	ID            string `json:"id,omitempty"`        // ID of the source for quick reference
-	Type          string `json:"type,omitempty"`      // Type of Inbound file. Supported types are ORDER and SNAPSHOT
-	FolderSource  string `json:"source,omitempty"`    // Source folder of the source
-	FolderError   string `json:"error,omitempty"`     // Error folder of the source
-	FolderSuccess string `json:"success,omitempty"`   // Success folder of the source
-	FileExtension string `json:"extension,omitempty"` // Extension of the file to pickup
+	ID        string `json:"id,omitempty"`        // ID of the source for quick reference
+	Type      string `json:"type,omitempty"`      // Type of Inbound file. Supported types are ORDER and SNAPSHOT
+	Source    string `json:"source,omitempty"`    // Source folder of the source
+	Relative  bool   `json:"relative"`            // Indicates that the Error and Success folders are relative to Source
+	Error     string `json:"error,omitempty"`     // Error folder of the source
+	Success   string `json:"success,omitempty"`   // Success folder of the source
+	Extension string `json:"extension,omitempty"` // Extension of the file to pickup
 }
 
 // Configuration - for various configuration settings. This struct can be modified depending on the requirement.
@@ -137,6 +145,7 @@ type Configuration struct {
 	CookieDomain          *string             `json:"CookieDomain,omitempty"`          // The domain of the cookie that this application will send
 	CrossOriginDomains    *[]string           `json:"CrossOriginDomains,omitempty"`    // Domains or endpoints that this application will allow
 	Databases             *[]DatabaseInfo     `json:"Databases,omitempty"`             // Configured databases for this application use
+	Directories           *[]DirectoryInfo    `json:"Directories,omitempty"`           // Configured directory for this application use
 	DefaultDatabaseID     *string             `json:"DefaultDatabaseID,omitempty"`     // The default database id that this application will find on the database configuration
 	DefaultEndpointID     *string             `json:"DefaultEndpointID,omitempty"`     // The default endpoint that this application will find on the API endpoints configuration
 	DefaultNotificationID *string             `json:"DefaultNotificationID,omitempty"` // The default notification id that this application will find on the notification configuration
@@ -154,152 +163,112 @@ type Configuration struct {
 	Secure                *bool               `json:"Secure,omitempty"`                // Flags if secure
 	Sources               *[]SourceInfo       `json:"Sources,omitempty"`               // Folder sources
 	WriteTimeout          *int                `json:"WriteTimeout,omitempty"`          // Default network timeout setting for writing data downloaded from this application
-	errorText             string
+	local                 bool                // Local file
 }
 
-// LoadConfig - load configuration file and return a configuration
-func LoadConfig(Source string) (*Configuration, error) {
-	return load(Source)
-}
+var (
+	ErrNoDataFromSource = errors.New(`no data from source for configuration`)
+	ErrSaveNotLocalFile = errors.New("configuration file is not local")
+)
 
-func load(Source string) (*Configuration, error) {
+func load(source string) (*Configuration, error) {
+
+	config := &Configuration{}
+	if !(strings.HasPrefix(source, `http://`) || strings.HasPrefix(source, `https://`)) {
+		config.local = true
+	}
 
 	var (
-		err       error
-		b         []byte
-		islocfile bool
+		err error
+		b   []byte
 	)
-
-	const def string = `DEFAULT`
-
-	config := &Configuration{
-		errorText: ``,
-	}
-
-	if !(strings.HasPrefix(Source, `http://`) || strings.HasPrefix(Source, `https://`)) {
-		islocfile = true
-	}
-
-	if islocfile {
-		if b, err = os.ReadFile(Source); err != nil {
-			config.errorText = err.Error()
-			return config, err
-		}
+	if config.local {
+		b, err = os.ReadFile(source)
 	} else {
-		if b, err = func() ([]byte, error) {
+		b, err =
+			func() ([]byte, error) {
+				var ob []byte
+				nr, err := http.Get(source)
+				if err != nil {
+					return ob, err
+				}
+				defer nr.Body.Close()
 
-			var ob []byte
-
-			nr, err := http.Get(Source)
-			if err != nil {
-				return ob, err
-			}
-			defer nr.Body.Close()
-
-			ob, err = io.ReadAll(nr.Body)
-			if err != nil {
-				return ob, err
-			}
-
-			return ob, nil
-		}(); err != nil {
-			config.errorText = err.Error()
-			return config, err
-		}
+				ob, err = io.ReadAll(nr.Body)
+				if err != nil {
+					return ob, err
+				}
+				return ob, nil
+			}()
 	}
-
-	if len(b) == 0 {
-		err = errors.New(`no data from source for configuration`)
-		config.errorText = err.Error()
+	if err != nil {
 		return config, err
 	}
 
-	config.FileName = Source
+	if len(b) == 0 {
+		return config, ErrNoDataFromSource
+	}
 
 	err = json.Unmarshal(b, config)
 	if err != nil {
-		config.errorText = err.Error()
 		return nil, err
 	}
 
+	const def string = `DEFAULT`
 	if config.DefaultDatabaseID == nil || *config.DefaultDatabaseID == "" {
-		config.DefaultDatabaseID = newString(def)
+		config.DefaultDatabaseID = new_string(def)
 	}
-
 	if config.DefaultEndpointID == nil || *config.DefaultEndpointID == "" {
-		config.DefaultEndpointID = newString(def)
+		config.DefaultEndpointID = new_string(def)
 	}
-
 	if config.DefaultNotificationID == nil || *config.DefaultNotificationID == "" {
-		config.DefaultNotificationID = newString(def)
+		config.DefaultNotificationID = new_string(def)
 	}
-
 	if config.CookieDomain == nil {
-		config.CookieDomain = newString(`localhost`)
+		config.CookieDomain = new_string(`localhost`)
 	}
-
 	if config.JWTSecret == nil {
-		config.JWTSecret = newString(`defaultsecretkey`)
+		config.JWTSecret = new_string(`defaultsecretkey`)
 	}
-
 	// Default setting for database
 	if config.Databases != nil {
 		dbs := *config.Databases
 		for i, cd := range dbs {
-
 			if cd.InterpolateTables == nil {
 				cd.InterpolateTables = new(bool)
 				*cd.InterpolateTables = true
 			}
-
 			if cd.StringEnclosingChar == nil || *cd.StringEnclosingChar == "" {
-				cd.StringEnclosingChar = new(string)
-				*cd.StringEnclosingChar = `'`
+				cd.StringEnclosingChar = new_string(`'`)
 			}
-
 			if cd.StringEscapeChar == nil || *cd.StringEscapeChar == "" {
-				cd.StringEscapeChar = new(string)
-				*cd.StringEscapeChar = `\`
+				cd.StringEscapeChar = new_string(`\`)
 			}
-
 			if cd.ReservedWordEscapeChar == nil || *cd.ReservedWordEscapeChar == "" {
-				cd.ReservedWordEscapeChar = new(string)
-				*cd.ReservedWordEscapeChar = `"`
+				cd.ReservedWordEscapeChar = new_string(`"`)
 			}
-
 			if cd.ParameterPlaceholder == "" {
 				cd.ParameterPlaceholder = `?`
 			}
-
 			if cd.StorageType == "" {
 				cd.StorageType = `SERVER`
+			} else {
+				cd.StorageType = strings.ToUpper(cd.StorageType)
 			}
-
-			cd.StorageType = strings.ToUpper(cd.StorageType)
-
 			drivern := strings.ToLower(cd.DriverName)
 			if cd.StorageType == `SERVER` && (drivern == `sqlserver` || drivern == `mssql`) {
-
 				if cd.IdentityQuery == nil || *cd.IdentityQuery == "" {
-					cd.IdentityQuery = new(string)
-					*cd.IdentityQuery = `SELECT SCOPE_IDENTITY();`
+					cd.IdentityQuery = new_string(`SELECT SCOPE_IDENTITY();`)
 				}
-
 				if cd.UTCDateFunction == nil || *cd.UTCDateFunction == "" {
-					cd.UTCDateFunction = new(string)
-					*cd.UTCDateFunction = `GETUTCDATE()`
+					cd.UTCDateFunction = new_string(`GETUTCDATE()`)
 				}
-
 				if cd.DateFunction == nil || *cd.DateFunction == "" {
-					cd.DateFunction = new(string)
-					*cd.DateFunction = `GETDATE()`
+					cd.DateFunction = new_string(`GETDATE()`)
 				}
-
 			}
-
 			dbs[i] = cd
 		}
-
 		config.Databases = &dbs
 	}
 
@@ -307,235 +276,185 @@ func load(Source string) (*Configuration, error) {
 	defnum := ""
 	if config.Notifications != nil {
 		nfs := *config.Notifications
-
 		for i, cn := range nfs {
 			if i > 0 {
 				defnum = strconv.Itoa(i)
 			}
-
 			if cn.ID == "" {
 				nfs[i].ID = def + defnum
 			}
 		}
-
 		config.Notifications = &nfs
 	}
 
+	config.FileName = source
 	return config, nil
 }
 
-// GetDatabaseInfo - get a database info by ID
-func (c *Configuration) GetDatabaseInfo(ConnectionID string) *DatabaseInfo {
-
+// GetDatabaseInfo get a database info by its ID
+func (c *Configuration) GetDatabaseInfo(connectionId string) *DatabaseInfo {
 	if c.Databases == nil {
-		return &DatabaseInfo{}
+		return nil
 	}
-
 	for _, v := range *c.Databases {
-		if v.ID == ConnectionID {
+		if v.ID == connectionId {
 			return &v
 		}
 	}
-
 	return nil
 }
 
-// GetDatabaseInfoGroup - get database infos based on the group id
-func (c *Configuration) GetDatabaseInfoGroup(GroupID string) *[]DatabaseInfo {
-
+// GetDatabaseInfoGroup gets database infos based on the group id
+func (c *Configuration) GetDatabaseInfoGroup(groupId string) []DatabaseInfo {
 	dbgi := make([]DatabaseInfo, 0)
-
-	if c.Databases == nil {
-		return &dbgi
+	if c.Databases == nil || groupId == "" {
+		return dbgi
 	}
-
 	for _, v := range *c.Databases {
-
 		if v.GroupID == nil {
 			continue
 		}
-
-		if *v.GroupID == GroupID {
+		if strings.EqualFold(*v.GroupID, groupId) {
 			dbgi = append(dbgi, v)
 		}
 	}
-
-	return &dbgi
+	return dbgi
 }
 
-// GetDomainInfo - get a domain info by name
-func (c *Configuration) GetDomainInfo(DomainName string) *DomainInfo {
-
-	if c.Domains == nil {
-		return &DomainInfo{}
+// GetDirectory retrieves a directory under a group
+func (c *Configuration) GetDirectory(groupId string) *DirectoryInfo {
+	if c.Directories == nil || len(*c.Directories) == 0 {
+		return nil
 	}
-
-	for _, v := range *c.Domains {
-		if v.Name == DomainName {
-			return &v
+	for _, dir := range *c.Directories {
+		if strings.EqualFold(dir.GroupID, groupId) {
+			return &dir
 		}
 	}
-
 	return nil
 }
 
-// GetEndpointAddress - get an endpoint value
-func (c *Configuration) GetEndpointAddress(id ...string) string {
-
-	if c.APIEndpoints == nil {
-		return ""
+// GetDirectoryItem retrieves a directory item under a group
+func (c *Configuration) GetDirectoryItem(groupId, key string) *Flag {
+	dir := c.GetDirectory(groupId)
+	if dir == nil {
+		return nil
 	}
-
-	var k string
-	if len(id) > 0 {
-		k = strings.ToLower(id[0])
-	}
-
-	if k == "" {
-		k = strings.ToLower(*c.DefaultEndpointID)
-	}
-
-	if k == "" {
-		return ""
-	}
-
-	eps := *c.APIEndpoints
-
-	for i := range eps {
-		k2 := strings.TrimSpace(strings.ToLower(eps[i].ID))
-		if k == k2 {
-			return eps[i].Address
+	for _, item := range dir.Items {
+		if strings.EqualFold(item.Key, key) {
+			return &item
 		}
 	}
+	return nil
+}
 
-	return ""
+// GetDomainInfo gets a domain info by name
+func (c *Configuration) GetDomainInfo(domainName string) *DomainInfo {
+	if c.Domains == nil || domainName == "" {
+		return nil
+	}
+	for _, v := range *c.Domains {
+		if strings.EqualFold(v.Name, domainName) {
+			return &v
+		}
+	}
+	return nil
 }
 
 // GetEndpointInfo - get an endpoint by id
 func (c *Configuration) GetEndpointInfo(id ...string) *EndpointInfo {
-
-	if c.APIEndpoints == nil {
+	if c.APIEndpoints == nil || (len(id) == 0 && (c.DefaultEndpointID == nil || *c.DefaultEndpointID == "")) {
 		return nil
 	}
-
-	var k string
+	k := strings.ToLower(*c.DefaultEndpointID)
 	if len(id) > 0 {
 		k = strings.ToLower(id[0])
 	}
-
-	if k == "" {
-		k = strings.ToLower(*c.DefaultEndpointID)
-	}
-
-	if k == "" {
-		return nil
-	}
-
 	eps := *c.APIEndpoints
-
-	for i := range eps {
-		k2 := strings.TrimSpace(strings.ToLower(eps[i].ID))
-		if k == k2 {
-			return &eps[i]
+	for _, ep := range eps {
+		if strings.EqualFold(k, ep.ID) {
+			return &ep
 		}
 	}
-
 	return nil
 }
 
-// GetDatabaseInfoGroup - get database infos based on the group id
-func (c *Configuration) GetEndpointInfoGroup(GroupID string) *[]EndpointInfo {
-
-	ee := make([]EndpointInfo, 0)
-
-	if c.APIEndpoints == nil {
-		return &ee
+// GetEndpointAddress gets an endpoint address value
+func (c *Configuration) GetEndpointAddress(id ...string) string {
+	if ep := c.GetEndpointInfo(id...); ep != nil {
+		return ep.Address
 	}
-
-	eps := *c.APIEndpoints
-
-	for _, v := range eps {
-
-		if v.GroupID == nil {
-			continue
-		}
-
-		if *v.GroupID == GroupID {
-			ee = append(ee, v)
-		}
-	}
-
-	return &ee
+	return ""
 }
 
-// GetNotificationInfo - get notification info
-func (c *Configuration) GetNotificationInfo(id ...string) (NotificationInfo, error) {
+// GetDatabaseInfoGroup gets database infos based on the group id
+func (c *Configuration) GetEndpointInfoGroup(groupId string) []EndpointInfo {
+	eps := make([]EndpointInfo, 0)
+	if c.APIEndpoints == nil {
+		return eps
+	}
+	for _, ep := range *c.APIEndpoints {
+		if ep.GroupID == nil {
+			continue
+		}
+		if strings.EqualFold(*ep.GroupID, groupId) {
+			eps = append(eps, ep)
+		}
+	}
+	return eps
+}
 
-	ni := NotificationInfo{}
-
-	if c.Notifications == nil {
-		return ni, nil
+// GetNotificationInfo gets notification info
+func (c *Configuration) GetNotificationInfo(id ...string) *NotificationInfo {
+	if c.Notifications == nil || (len(id) == 0 && (c.DefaultNotificationID == nil || *c.DefaultNotificationID == "")) {
+		return nil
 	}
 
-	var k string
+	k := strings.ToLower(*c.DefaultNotificationID)
 	if len(id) > 0 {
 		k = strings.ToLower(id[0])
 	}
 
-	if k == "" {
-		k = strings.ToLower(*c.DefaultNotificationID)
-	}
-
 	nfs := *c.Notifications
-
-	if len(nfs) == 0 {
-		return ni, errors.New("no notification configuration could be found")
-	}
-
-	for i := range nfs {
-		k2 := strings.TrimSpace(strings.ToLower(nfs[i].ID))
-		if k == k2 {
-			return nfs[i], nil
+	for _, nf := range nfs {
+		if strings.EqualFold(k, nf.ID) {
+			return &nf
 		}
 	}
-
-	return ni, errors.New("notification could not be found")
+	return nil
 }
 
-// GetSourceInfo - get source by id
-func (c *Configuration) GetSourceInfo(SourceID string) (*SourceInfo, error) {
-
-	if c.Sources == nil {
-		return nil, nil
+// GetSourceInfo gets source by id
+func (c *Configuration) GetSourceInfo(sourceId string) *SourceInfo {
+	if c.Sources == nil || sourceId == "" {
+		return nil
 	}
-
-	srcs := *c.Sources
-
-	for _, v := range srcs {
-		if v.ID == SourceID {
-			return &v, nil
+	for _, v := range *c.Sources {
+		if strings.EqualFold(v.ID, sourceId) {
+			return &v
 		}
 	}
-
-	return &SourceInfo{}, nil
+	return nil
 }
 
-// Save - save configuration file
-func (c *Configuration) Save() bool {
-	var b []byte
-	var err error
-
-	c.errorText = ""
-	if b, err = json.MarshalIndent(c, "", "\t"); err != nil {
-		c.errorText = err.Error()
-		return false
+// Save saves configuration file
+func (c *Configuration) Save() error {
+	if c.local {
+		return ErrSaveNotLocalFile
 	}
-
+	b, err := json.MarshalIndent(c, "", "\t")
+	if err != nil {
+		return err
+	}
 	if err = os.WriteFile(c.FileName, b, os.ModePerm); err != nil {
-		c.errorText = err.Error()
-		return false
+		return err
 	}
-	return true
+	return nil
+}
+
+// LoadConfig loads configuration file and return a configuration
+func LoadConfig(source string) (*Configuration, error) {
+	return load(source)
 }
 
 // Reload configuration
@@ -544,36 +463,26 @@ func (c *Configuration) Reload() error {
 	return err
 }
 
-// LastErrorText - gets the last error
-func (c *Configuration) LastErrorText() string {
-	return c.errorText
-}
-
-// Flag - get a flag value
+// Flag gets a flag value
 func (c *Configuration) Flag(key string) Flag {
-
 	ret := Flag{
 		Key:   key,
 		Value: nil,
 	}
-
 	if c.Flags == nil {
 		return ret
 	}
-
 	// get flags to loop from
-	flgs := *c.Flags
-	for i := range flgs {
-		if strings.EqualFold(key, flgs[i].Key) {
-			ret = flgs[i]
-			break
+	for _, f := range *c.Flags {
+		if strings.EqualFold(key, f.Key) {
+			return f
 		}
 	}
 
 	return ret
 }
 
-func newString(initial string) (init *string) {
+func new_string(initial string) (init *string) {
 	init = new(string)
 	*init = initial
 	return
