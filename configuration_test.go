@@ -13,7 +13,7 @@ type EmbeddedConfiguration struct {
 }
 
 func TestLoadConfig(t *testing.T) {
-	config, err := LoadConfig("config.mssql.json")
+	config, err := Load("config.mssql.json")
 	if err != nil {
 		t.Fail()
 		t.Fatalf(`Error %v`, err)
@@ -46,7 +46,7 @@ func TestLoadConfig(t *testing.T) {
 }
 
 func TestLoadURLConfig(t *testing.T) {
-	config, err := LoadConfig("http://valkyrie.vdimdci.com.ph/xtest/config.json")
+	config, err := Load("http://valkyrie.vdimdci.com.ph/xtest/config.json")
 	if err != nil {
 		t.Fail()
 		t.Fatalf(`Error %v`, err)

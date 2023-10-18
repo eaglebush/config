@@ -452,8 +452,8 @@ func (c *Configuration) Save() error {
 	return nil
 }
 
-// LoadConfig loads configuration file and return a configuration
-func LoadConfig(source string) (*Configuration, error) {
+// Load loads configuration file and return a configuration
+func Load(source string) (*Configuration, error) {
 	return load(source)
 }
 
@@ -465,6 +465,7 @@ func (c *Configuration) Reload() error {
 
 // Flag gets a flag value
 func (c *Configuration) Flag(key string) Flag {
+	key = strings.TrimSpace(key)
 	ret := Flag{
 		Key:   key,
 		Value: nil,
@@ -473,9 +474,15 @@ func (c *Configuration) Flag(key string) Flag {
 		return ret
 	}
 	// get flags to loop from
+	// also loop from variations
+	// of convention, like underscore
+	// and dash
 	for _, f := range *c.Flags {
-		if strings.EqualFold(key, f.Key) {
-			return f
+		for _, v := range []string{"_", "-"} {
+			ki := strings.ReplaceAll(f.Key, v, "")
+			if strings.EqualFold(key, ki) {
+				return f
+			}
 		}
 	}
 
