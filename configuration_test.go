@@ -13,7 +13,7 @@ type EmbeddedConfiguration struct {
 }
 
 func TestLoadConfig(t *testing.T) {
-	config, err := Load("config.mssql.json")
+	config, err := Load("samples/config.mssql.json")
 	if err != nil {
 		t.Fail()
 		t.Fatalf(`Error %v`, err)
