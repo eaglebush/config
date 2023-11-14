@@ -119,6 +119,7 @@ type QueueInfo struct {
 	ServerAddressGroup []string `json:"ServerAddressGroup,omitempty"` // Queue server address group
 	Cluster            string   `json:"Cluster,omitempty"`            // Cluster name
 	ClientID           string   `json:"ClientID,omitempty"`           // ClientID of the service
+	StreamName         string   `json:"stream_name,omitempty"`        // Stream name
 }
 
 // SourceInfo - file sources for configuration
