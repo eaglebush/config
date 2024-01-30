@@ -50,6 +50,7 @@ type NotificationInfo struct {
 	Active        bool
 	SenderAddress string
 	SenderName    string
+	ReplyTo       string
 	Recipients    []NotificationRecipient
 }
 
