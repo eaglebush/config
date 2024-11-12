@@ -43,6 +43,10 @@ type (
 	// OAuthProviderInfo for OAuth configuration
 	OAuthProviderInfo struct {
 		ID             string // OAuth provider info id for quick access
+		Name           string // OAuth name for miscellaneous purposes
+		IconUrl        string // OAuth icon image for miscellaneous purposes
+		EmbedText      string // OAuth embed options
+		Label          string // OAuth label for visual controls
 		ClientID       string // Represents the application id registered in an OAuth provider
 		ProviderWebUri string // The web URI to get authorization and access keys
 		ProviderApiUri string // The API URI to get authorization and access keys
