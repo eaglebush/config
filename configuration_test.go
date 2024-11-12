@@ -21,13 +21,6 @@ func TestLoadConfig(t *testing.T) {
 
 	v := config.GetDatabaseInfo("DEFAULT")
 
-	var km []DatabaseKeyword
-	if v.KeywordMap != nil || len(*v.KeywordMap) > 0 {
-		km = *v.KeywordMap
-	}
-
-	fmt.Println(km[0].Key)
-	fmt.Println(km[0].Value)
 	vi := config.Flag("Joan").String()
 	fmt.Println(vi)
 
@@ -53,16 +46,6 @@ func TestLoadURLConfig(t *testing.T) {
 	}
 
 	v := config.GetDatabaseInfo("DEFAULT")
-
-	if v.KeywordMap != nil || len(*v.KeywordMap) > 0 {
-		km := *v.KeywordMap
-
-		fmt.Println(km[0].Key)
-		fmt.Println(km[0].Value)
-		vi := config.Flag("Joan").String()
-		fmt.Println(vi)
-
-	}
 
 	fmt.Println(`Parameter PlaceHolder: `, v.ParameterPlaceholder)
 

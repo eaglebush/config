@@ -6,7 +6,16 @@
 			"Address": ""
 		}
 	],
-	"APIKey": "00000",
+	"OAuths" : [
+		{
+			"ID": "AppCore",
+			"ClientID": "1234554321",
+			"ProviderWebUri": "http://localhost:1000",
+			"ProviderApiUri": "http://localhost:1000/api",
+			"ResponseType": "code",
+			"Scope": "nothing"
+		}
+	],
 	"ApplicationID": "Default",
 	"ApplicationName": "Default Application",
 	"ApplicationTheme": "default",

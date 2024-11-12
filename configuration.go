@@ -10,163 +10,172 @@ import (
 	"strings"
 )
 
-// DatabaseKeyword - struct for database keywords
-type DatabaseKeyword struct {
-	Flag
-}
+type (
+	// DatabaseKeyword for database keywords
+	DatabaseKeyword struct {
+		Flag
+	}
 
-// APIKeyInfo contains an API info
-type APIKeyInfo struct {
-	ID    string
-	Name  string
-	Key   string
-	Token *string
-}
+	// APIKeyInfo contains an API info configuration
+	APIKeyInfo struct {
+		ID    string
+		Name  string
+		Key   string
+		Token *string
+	}
 
-// DirectoryInfo contains a directory info
-type DirectoryInfo struct {
-	GroupID     string
-	Description string
-	Items       []Flag
-}
+	// DirectoryInfo contains a directory info configuration
+	DirectoryInfo struct {
+		GroupID     string
+		Description string
+		Items       []Flag
+	}
 
-// Endpoint - endpoint struct
-type EndpointInfo struct {
-	ID      string  // Endpoint ID for quick access
-	Name    string  // Endpoint Name to show
-	Address string  // The absolute URL to the resource
-	GroupID *string // A group id to get certain endpoint set
-	Token   *string
-}
+	// Endpoint contains an endpoint info configuration
+	EndpointInfo struct {
+		ID      string  // Endpoint ID for quick access
+		Name    string  // Endpoint Name to show
+		Address string  // The absolute URL to the resource
+		GroupID *string // A group id to get certain endpoint set
+		Token   *string
+	}
 
-// NotificationInfo - notification information on connecting to Notify API
-type NotificationInfo struct {
-	ID            string
-	APIHost       string
-	APIPath       string
-	Type          string
-	Login         string
-	Password      string
-	Active        bool
-	SenderAddress string
-	SenderName    string
-	ReplyTo       string
-	Recipients    []NotificationRecipient
-}
+	// OAuthProviderInfo for OAuth configuration
+	OAuthProviderInfo struct {
+		ID             string // OAuth provider info id for quick access
+		ClientID       string // Represents the application id registered in an OAuth provider
+		ProviderWebUri string // The web URI to get authorization and access keys
+		ProviderApiUri string // The API URI to get authorization and access keys
+		ResponseType   string // The type of response that the application needs from the OAuth provider
+		Scope          string // The scope of access to resources
+	}
 
-// CacheInfo connection information
-type CacheInfo struct {
-	Provider string
-	Address  string
-	Password string
-	DB       int
-}
+	// NotificationInfo - notification information on connecting to Notify API
+	NotificationInfo struct {
+		ID            string
+		APIHost       string
+		APIPath       string
+		Type          string
+		Login         string
+		Password      string
+		Active        bool
+		SenderAddress string
+		SenderName    string
+		ReplyTo       string
+		Recipients    []NotificationRecipient
+	}
 
-// DomainInfo - domain information for LDAP authentication
-type DomainInfo struct {
-	Name               string
-	Host               string
-	Port               uint16
-	Path               string
-	AuthorizedUser     string
-	AuthorizedPassword string
-	Filter             string
-}
+	// CacheInfo connection information
+	CacheInfo struct {
+		Provider string
+		Address  string
+		Password string
+		DB       int
+	}
 
-// SequenceGeneratorInfo - sequence generator query
-type SequenceGeneratorInfo struct {
-	UpsertQuery     string
-	ResultQuery     string
-	NamePlaceHolder string
-}
+	// DomainInfo - domain information for LDAP authentication
+	DomainInfo struct {
+		Name               string
+		Host               string
+		Port               uint16
+		Path               string
+		AuthorizedUser     string
+		AuthorizedPassword string
+		Filter             string
+	}
 
-// DatabaseInfo - database configuration setting
-type DatabaseInfo struct {
-	GroupID                *string                `json:"GroupID,omitempty"`                // GroupID allows us to get groups of connection
-	ID                     string                 `json:"ID,omitempty"`                     // A unique ID that will identify the connection to a database
-	ConnectionString       string                 `json:"ConnectionString,omitempty"`       // ConnectionString specific to the database
-	DriverName             string                 `json:"DriverName,omitempty"`             // DriverName needs to be specified depending on the driver id used by the Go database driver
-	StorageType            string                 `json:"StorageType,omitempty"`            // FILE for filebased database such as Access, SQlite or LocalDB. SERVER for SQL Server, MySQL etc
-	HelperID               string                 `json:"HelperID,omitempty"`               // When using github.com/NarsilWorks-Inc/datahelperlite, this is needed in the configuration file
-	ParameterPlaceholder   string                 `json:"ParameterPlaceholder,omitempty"`   // Parameter place holder for prepared statements. Default is '?'
-	ParameterInSequence    bool                   `json:"ParameterInSequence,omitempty"`    // Parameter place holder is in sequence. Default is false
-	Schema                 string                 `json:"Schema,omitempty"`                 // Schema for any of the database operations
-	InterpolateTables      *bool                  `json:"InterpolateTables,omitempty"`      // Enables the tables to be interpolated with schema
-	SequenceGenerator      *SequenceGeneratorInfo `json:"SequenceGenerator,omitempty"`      // Sequence generator configuration
-	StringEnclosingChar    *string                `json:"StringEnclosingChar,omitempty"`    // Gets or sets the character that encloses a string in the query
-	StringEscapeChar       *string                `json:"StringEscapeChar,omitempty"`       // Gets or Sets the character that escapes a reserved character such as the character that encloses a s string
-	IdentityQuery          *string                `json:"IdentityQuery,omitempty"`          // A query to get the generated identity
-	DateFunction           *string                `json:"DateFunction,omitempty"`           // The date function of each SQL database driver
-	UTCDateFunction        *string                `json:"UTCDateFunction,omitempty"`        // The UTC date function of each SQL database driver
-	MaxOpenConnection      *int                   `json:"MaxOpenConnection,omitempty"`      // Maximum open connection
-	MaxIdleConnection      *int                   `json:"MaxIdleConnection,omitempty"`      // Maximum idle connection
-	MaxConnectionLifetime  *int                   `json:"MaxConnectionLifetime,omitempty"`  // Max connection lifetime
-	MaxConnectionIdleTime  *int                   `json:"MaxConnectionIdleTime,omitempty"`  // Max idle connection lifetime
-	Ping                   *bool                  `json:"Ping,omitempty"`                   // Ping connection
-	ReservedWordEscapeChar *string                `json:"ReservedWordEscapeChar,omitempty"` // Reserved word escape chars. For escaping with different opening and closing characters, just set to both. Example. `[]` for SQL server
-	KeywordMap             *[]DatabaseKeyword     `json:"KeywordMap,omitempty"`             // various keyword equivalents
-}
+	// SequenceGeneratorInfo - sequence generator query
+	SequenceGeneratorInfo struct {
+		UpsertQuery     string
+		ResultQuery     string
+		NamePlaceHolder string
+	}
 
-// NotificationRecipient - notification standard recipients
-type NotificationRecipient struct {
-	ID      string
-	Name    string
-	Address string
-}
+	// DatabaseInfo - database configuration setting
+	DatabaseInfo struct {
+		GroupID                *string                // GroupID allows us to get groups of connection
+		ID                     string                 // A unique ID that will identify the connection to a database
+		ConnectionString       string                 // ConnectionString specific to the database
+		DriverName             string                 // DriverName needs to be specified depending on the driver id used by the Go database driver
+		StorageType            string                 // FILE for filebased database such as Access, SQlite or LocalDB. SERVER for SQL Server, MySQL etc
+		HelperID               string                 // When using github.com/NarsilWorks-Inc/datahelperlite, this is needed in the configuration file
+		ParameterPlaceholder   string                 // Parameter place holder for prepared statements. Default is '?'
+		ParameterInSequence    bool                   // Parameter place holder is in sequence. Default is false
+		Schema                 string                 // Schema for any of the database operations
+		InterpolateTables      *bool                  // Enables the tables to be interpolated with schema
+		SequenceGenerator      *SequenceGeneratorInfo // Sequence generator configuration
+		StringEnclosingChar    *string                // Gets or sets the character that encloses a string in the query
+		StringEscapeChar       *string                // Gets or Sets the character that escapes a reserved character such as the character that encloses a s string
+		MaxOpenConnection      *int                   // Maximum open connection
+		MaxIdleConnection      *int                   // Maximum idle connection
+		MaxConnectionLifetime  *int                   // Max connection lifetime
+		MaxConnectionIdleTime  *int                   // Max idle connection lifetime
+		Ping                   *bool                  // Ping connection
+		ReservedWordEscapeChar *string                // Reserved word escape chars. For escaping with different opening and closing characters, just set to both. Example. `[]` for SQL server
+	}
 
-// QueueInfo - queue info connector
-type QueueInfo struct {
-	ID                 string   `json:"ID,omitempty"`                 // ID of the setting
-	ServerAddressGroup []string `json:"ServerAddressGroup,omitempty"` // Queue server address group
-	Cluster            string   `json:"Cluster,omitempty"`            // Cluster name
-	ClientID           string   `json:"ClientID,omitempty"`           // ClientID of the service
-	StreamName         string   `json:"StreamName,omitempty"`         // Stream name
-}
+	// NotificationRecipient - notification standard recipients
+	NotificationRecipient struct {
+		ID      string
+		Name    string
+		Address string
+	}
 
-// SourceInfo - file sources for configuration
-type SourceInfo struct {
-	ID        string `json:"id,omitempty"`        // ID of the source for quick reference
-	Type      string `json:"type,omitempty"`      // Type of Inbound file. Supported types are ORDER and SNAPSHOT
-	Source    string `json:"source,omitempty"`    // Source folder of the source
-	Relative  bool   `json:"relative"`            // Indicates that the Error and Success folders are relative to Source
-	Error     string `json:"error,omitempty"`     // Error folder of the source
-	Success   string `json:"success,omitempty"`   // Success folder of the source
-	Extension string `json:"extension,omitempty"` // Extension of the file to pickup
-}
+	// QueueInfo - queue info connector
+	QueueInfo struct {
+		ID                 string   // ID of the setting
+		ServerAddressGroup []string // Queue server address group
+		Cluster            string   // Cluster name
+		ClientID           string   // ClientID of the service
+		StreamName         string   // Stream name
+	}
 
-// Configuration - for various configuration settings. This struct can be modified depending on the requirement.
-type Configuration struct {
-	APIEndpoints          *[]EndpointInfo     `json:"APIEndpoints,omitempty"`          // External API endpoints that this application can communicate
-	APIKeys               *[]APIKeyInfo       `json:"APIKeys,omitempty"`               // API Keys
-	ApplicationID         *string             `json:"ApplicationID,omitempty"`         // ID of this application
-	ApplicationName       *string             `json:"ApplicationName,omitempty"`       // Name of this application
-	ApplicationTheme      *string             `json:"ApplicationTheme,omitempty"`      // Theme of this application
-	Cache                 *CacheInfo          `json:"Cache,omitempty"`                 // Cache info of this application
-	CertificateFile       *string             `json:"CertificateFile,omitempty"`       // Certificate file
-	CertificateKey        *string             `json:"CertificateKey,omitempty"`        // Certificate private key
-	CookieDomain          *string             `json:"CookieDomain,omitempty"`          // The domain of the cookie that this application will send
-	CrossOriginDomains    *[]string           `json:"CrossOriginDomains,omitempty"`    // Domains or endpoints that this application will allow
-	Databases             *[]DatabaseInfo     `json:"Databases,omitempty"`             // Configured databases for this application use
-	Directories           *[]DirectoryInfo    `json:"Directories,omitempty"`           // Configured directory for this application use
-	DefaultDatabaseID     *string             `json:"DefaultDatabaseID,omitempty"`     // The default database id that this application will find on the database configuration
-	DefaultEndpointID     *string             `json:"DefaultEndpointID,omitempty"`     // The default endpoint that this application will find on the API endpoints configuration
-	DefaultNotificationID *string             `json:"DefaultNotificationID,omitempty"` // The default notification id that this application will find on the notification configuration
-	Domains               *[]DomainInfo       `json:"Domains,omitempty"`               // Configured domains for this application use
-	FileName              string              `json:"FileName,omitempty"`              // Filename of the current configuration
-	Flags                 *[]Flag             `json:"Flags,omitempty"`                 // Miscellaneous flags for this application use
-	HostInternalURL       *string             `json:"HostInternalURL,omitempty"`       // The internal host URL that this application will use to set returned resources and assets
-	HostExternalURL       *string             `json:"HostExternalURL,omitempty"`       // The external host URL that this application will use to set returned resources and assets
-	HostPort              *int                `json:"HostPort,omitempty"`              // The network port for the application
-	JWTSecret             *string             `json:"JWTSecret,omitempty"`             // Application wide JSON Web Token (JWT) secret
-	LicenseSerial         *string             `json:"LicenseSerial,omitempty"`         // License serial of this application
-	Notifications         *[]NotificationInfo `json:"Notifications,omitempty"`         // Configured notifications for this application use
-	Queue                 *QueueInfo          `json:"Queue,omitempty"`                 // Queue or message queue
-	ReadTimeout           *int                `json:"ReadTimeout,omitempty"`           // Default network timeout setting for reading data uploaded to this application
-	Secure                *bool               `json:"Secure,omitempty"`                // Flags if secure
-	Sources               *[]SourceInfo       `json:"Sources,omitempty"`               // Folder sources
-	WriteTimeout          *int                `json:"WriteTimeout,omitempty"`          // Default network timeout setting for writing data downloaded from this application
-	local                 bool                // Local file
-}
+	// SourceInfo - file sources for configuration
+	SourceInfo struct {
+		ID        string // ID of the source for quick reference
+		Type      string // Type of Inbound file. Supported types are ORDER and SNAPSHOT
+		Source    string // Source folder of the source
+		Relative  bool   // Indicates that the Error and Success folders are relative to Source
+		Error     string // Error folder of the source
+		Success   string // Success folder of the source
+		Extension string // Extension of the file to pickup
+	}
+
+	// Configuration
+	Configuration struct {
+		APIEndpoints          *[]EndpointInfo      // External API endpoints that this application can communicate
+		APIKeys               *[]APIKeyInfo        // API Keys
+		ApplicationID         *string              // ID of this application
+		ApplicationName       *string              // Name of this application
+		ApplicationTheme      *string              // Theme of this application
+		Cache                 *CacheInfo           // Cache info of this application
+		CertificateFile       *string              // Certificate file
+		CertificateKey        *string              // Certificate private key
+		CookieDomain          *string              // The domain of the cookie that this application will send
+		CrossOriginDomains    *[]string            // Domains or endpoints that this application will allow
+		Databases             *[]DatabaseInfo      // Configured databases for this application use
+		Directories           *[]DirectoryInfo     // Configured directory for this application use
+		DefaultDatabaseID     *string              // The default database id that this application will find on the database configuration
+		DefaultEndpointID     *string              // The default endpoint that this application will find on the API endpoints configuration
+		DefaultNotificationID *string              // The default notification id that this application will find on the notification configuration
+		Domains               *[]DomainInfo        // Configured domains for this application use
+		FileName              string               // Filename of the current configuration
+		Flags                 *[]Flag              // Miscellaneous flags for this application use
+		HostInternalURL       *string              // The internal host URL that this application will use to set returned resources and assets
+		HostExternalURL       *string              // The external host URL that this application will use to set returned resources and assets
+		HostPort              *int                 // The network port for the application
+		JWTSecret             *string              // Application wide JSON Web Token (JT) secret
+		LicenseSerial         *string              // License serial of this application
+		Notifications         *[]NotificationInfo  // Configured notifications for this application use
+		OAuths                *[]OAuthProviderInfo // OAuth definitions
+		Queue                 *QueueInfo           // Queue or message queue
+		ReadTimeout           *int                 // Default network timeout setting for reading data uploaded to this application
+		Secure                *bool                // Flags if secure
+		Sources               *[]SourceInfo        // Folder sources
+		WriteTimeout          *int                 // Default network timeout setting for writing data downloaded from this application
+		local                 bool                 // Local file
+	}
+)
 
 var (
 	ErrNoDataFromSource = errors.New(`no data from source for configuration`)
@@ -174,7 +183,6 @@ var (
 )
 
 func load(source string) (*Configuration, error) {
-
 	config := &Configuration{}
 	if !(strings.HasPrefix(source, `http://`) || strings.HasPrefix(source, `https://`)) {
 		config.local = true
@@ -206,11 +214,9 @@ func load(source string) (*Configuration, error) {
 	if err != nil {
 		return config, err
 	}
-
 	if len(b) == 0 {
 		return config, ErrNoDataFromSource
 	}
-
 	err = json.Unmarshal(b, config)
 	if err != nil {
 		return nil, err
@@ -257,18 +263,6 @@ func load(source string) (*Configuration, error) {
 			} else {
 				cd.StorageType = strings.ToUpper(cd.StorageType)
 			}
-			drivern := strings.ToLower(cd.DriverName)
-			if cd.StorageType == `SERVER` && (drivern == `sqlserver` || drivern == `mssql`) {
-				if cd.IdentityQuery == nil || *cd.IdentityQuery == "" {
-					cd.IdentityQuery = new_string(`SELECT SCOPE_IDENTITY();`)
-				}
-				if cd.UTCDateFunction == nil || *cd.UTCDateFunction == "" {
-					cd.UTCDateFunction = new_string(`GETUTCDATE()`)
-				}
-				if cd.DateFunction == nil || *cd.DateFunction == "" {
-					cd.DateFunction = new_string(`GETDATE()`)
-				}
-			}
 			dbs[i] = cd
 		}
 		config.Databases = &dbs
@@ -294,12 +288,12 @@ func load(source string) (*Configuration, error) {
 }
 
 // GetDatabaseInfo get a database info by its ID
-func (c *Configuration) GetDatabaseInfo(connectionId string) *DatabaseInfo {
+func (c *Configuration) GetDatabaseInfo(id string) *DatabaseInfo {
 	if c.Databases == nil {
 		return nil
 	}
 	for _, v := range *c.Databases {
-		if v.ID == connectionId {
+		if v.ID == id {
 			return &v
 		}
 	}
@@ -364,13 +358,13 @@ func (c *Configuration) GetDomainInfo(domainName string) *DomainInfo {
 }
 
 // GetEndpointInfo - get an endpoint by id
-func (c *Configuration) GetEndpointInfo(id ...string) *EndpointInfo {
+func (c *Configuration) GetEndpointInfo(id string) *EndpointInfo {
 	if c.APIEndpoints == nil || (len(id) == 0 && (c.DefaultEndpointID == nil || *c.DefaultEndpointID == "")) {
 		return nil
 	}
 	k := strings.ToLower(*c.DefaultEndpointID)
 	if len(id) > 0 {
-		k = strings.ToLower(id[0])
+		k = strings.ToLower(id)
 	}
 	eps := *c.APIEndpoints
 	for _, ep := range eps {
@@ -379,14 +373,6 @@ func (c *Configuration) GetEndpointInfo(id ...string) *EndpointInfo {
 		}
 	}
 	return nil
-}
-
-// GetEndpointAddress gets an endpoint address value
-func (c *Configuration) GetEndpointAddress(id ...string) string {
-	if ep := c.GetEndpointInfo(id...); ep != nil {
-		return ep.Address
-	}
-	return ""
 }
 
 // GetDatabaseInfoGroup gets database infos based on the group id
@@ -407,16 +393,14 @@ func (c *Configuration) GetEndpointInfoGroup(groupId string) []EndpointInfo {
 }
 
 // GetNotificationInfo gets notification info
-func (c *Configuration) GetNotificationInfo(id ...string) *NotificationInfo {
+func (c *Configuration) GetNotificationInfo(id string) *NotificationInfo {
 	if c.Notifications == nil || (len(id) == 0 && (c.DefaultNotificationID == nil || *c.DefaultNotificationID == "")) {
 		return nil
 	}
-
 	k := strings.ToLower(*c.DefaultNotificationID)
 	if len(id) > 0 {
-		k = strings.ToLower(id[0])
+		k = strings.ToLower(id)
 	}
-
 	nfs := *c.Notifications
 	for _, nf := range nfs {
 		if strings.EqualFold(k, nf.ID) {
@@ -427,13 +411,26 @@ func (c *Configuration) GetNotificationInfo(id ...string) *NotificationInfo {
 }
 
 // GetSourceInfo gets source by id
-func (c *Configuration) GetSourceInfo(sourceId string) *SourceInfo {
-	if c.Sources == nil || sourceId == "" {
+func (c *Configuration) GetSourceInfo(id string) *SourceInfo {
+	if c.Sources == nil || id == "" {
 		return nil
 	}
 	for _, v := range *c.Sources {
-		if strings.EqualFold(v.ID, sourceId) {
+		if strings.EqualFold(v.ID, id) {
 			return &v
+		}
+	}
+	return nil
+}
+
+// GetOAuthInfo gets an OAuth info by id
+func (c *Configuration) GetOAuthInfo(id string) *OAuthProviderInfo {
+	if c.OAuths == nil || len(*c.OAuths) == 0 || len(id) == 0 {
+		return nil
+	}
+	for _, oa := range *c.OAuths {
+		if strings.EqualFold(id, oa.ID) {
+			return &oa
 		}
 	}
 	return nil
