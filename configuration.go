@@ -16,14 +16,6 @@ type (
 		Flag
 	}
 
-	// APIKeyInfo contains an API info configuration
-	APIKeyInfo struct {
-		ID    string
-		Name  string
-		Key   string
-		Token *string
-	}
-
 	// DirectoryInfo contains a directory info configuration
 	DirectoryInfo struct {
 		GroupID     string
@@ -31,13 +23,14 @@ type (
 		Items       []Flag
 	}
 
-	// Endpoint contains an endpoint info configuration
+	// EndpointInfo contains an endpoint info configuration
 	EndpointInfo struct {
 		ID      string  // Endpoint ID for quick access
 		Name    string  // Endpoint Name to show
 		Address string  // The absolute URL to the resource
 		GroupID *string // A group id to get certain endpoint set
-		Token   *string
+		Token   *string // A static JWT token for instant access
+		APIKey  *string // An API key for the endpoint
 	}
 
 	// OAuthProviderInfo for OAuth configuration
@@ -148,7 +141,6 @@ type (
 	// Configuration
 	Configuration struct {
 		APIEndpoints          *[]EndpointInfo      // External API endpoints that this application can communicate
-		APIKeys               *[]APIKeyInfo        // API Keys
 		ApplicationID         *string              // ID of this application
 		ApplicationName       *string              // Name of this application
 		ApplicationTheme      *string              // Theme of this application
