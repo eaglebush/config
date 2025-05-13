@@ -484,6 +484,43 @@ func (c *Configuration) Flag(key string) Flag {
 	return ret
 }
 
+// GetFlag retrieves a flag value and return it converted to type indicated
+func GetFlag[T FlagTypes](flgs *[]Flag, key string) T {
+	var zero T
+	if key == "" || flgs == nil || len(*flgs) == 0 {
+		return zero
+	}
+	for _, flg := range *flgs {
+		if strings.EqualFold(flg.Key, key) {
+			switch any(*new(T)).(type) {
+			case string:
+				return any(*flg.Value).(T)
+			case int:
+				v, _ := strconv.Atoi(*flg.Value)
+				return any(v).(T)
+			case int32:
+				v, _ := strconv.ParseInt(*flg.Value, 10, 32)
+				return any(v).(T)
+			case int64:
+				v, _ := strconv.ParseInt(*flg.Value, 10, 64)
+				return any(v).(T)
+			case bool:
+				v, _ := strconv.ParseBool(*flg.Value)
+				return any(v).(T)
+			case float32:
+				v, _ := strconv.ParseFloat(*flg.Value, 32)
+				return any(v).(T)
+			case float64:
+				v, _ := strconv.ParseFloat(*flg.Value, 64)
+				return any(v).(T)
+			default:
+				return zero
+			}
+		}
+	}
+	return zero
+}
+
 func new_string(initial string) (init *string) {
 	init = new(string)
 	*init = initial

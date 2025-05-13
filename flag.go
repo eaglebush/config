@@ -6,10 +6,15 @@ import (
 )
 
 // Flag - dynamic flags structure
-type Flag struct {
-	Key   string  `json:"key,omitempty"`
-	Value *string `json:"value,omitempty"`
-}
+type (
+	Flag struct {
+		Key   string  `json:"key,omitempty"`
+		Value *string `json:"value,omitempty"`
+	}
+	FlagTypes interface {
+		string | int | int32 | int64 | bool | float32 | float64
+	}
+)
 
 // Bool - return a boolean from flag value
 func (f Flag) Bool() *bool {
