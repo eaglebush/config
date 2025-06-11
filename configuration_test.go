@@ -32,6 +32,9 @@ func TestLoadConfig(t *testing.T) {
 
 	config.LicenseSerial = new_string("12345678")
 
+	apiInfo := config.GetEndpointInfo("DEFAULT")
+	_ = apiInfo
+
 	// ok := config.Save()
 	// if !ok {
 	// 	fmt.Printf("%s", config.LastErrorText())

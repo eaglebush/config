@@ -1,11 +1,19 @@
 {
-	"APIEndpoints": [
-		{
-			"ID": "DEFAULT",
-			"Name": "",
-			"Address": ""
-		}
-	],
+    "APIEndpoints": [
+        {
+            "ID": "DEFAULT",
+            "Address": "http://localhost:8012/"
+        },
+        {
+            "ID": "INBOUND",
+            "Address": "http://localhost:8010/"
+        },
+        {
+            "ID": "AUTH",
+            "Address": "https://appcore-test.vdimdci.com.ph/api",
+            "Addressx": "http://localhost:15001"
+        }
+    ],
 	"OAuths" : [
 		{
 			"ID": "AppCore",

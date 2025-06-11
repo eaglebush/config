@@ -41,6 +41,7 @@ type (
 		EmbedText      string // OAuth embed options
 		Label          string // OAuth label for visual controls
 		ClientID       string // Represents the application id registered in an OAuth provider
+		ProviderHost   string // The host name of the provider. This is useful to get assets from the provider.
 		ProviderWebUri string // The web URI to get authorization and access keys
 		ProviderApiUri string // The API URI to get authorization and access keys
 		ResponseType   string // The type of response that the application needs from the OAuth provider
