@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"regexp"
 	"strconv"
 	"strings"
 )
@@ -31,6 +32,10 @@ type (
 		GroupID *string // A group id to get certain endpoint set
 		Token   *string // A static JWT token for instant access
 		APIKey  *string // An API key for the endpoint
+
+		cfgAddress string
+		cfgToken   *string
+		cfgAPIKey  *string
 	}
 
 	// OAuthProviderInfo for OAuth configuration
@@ -46,6 +51,11 @@ type (
 		ProviderApiUri string // The API URI to get authorization and access keys
 		ResponseType   string // The type of response that the application needs from the OAuth provider
 		Scope          string // The scope of access to resources
+
+		cfgIconUrl        string
+		cfgProviderHost   string
+		cfgProviderWebUri string
+		cfgProviderApiUri string
 	}
 
 	// NotificationInfo - notification information on connecting to Notify API
@@ -61,6 +71,12 @@ type (
 		SenderName    string
 		ReplyTo       string
 		Recipients    []NotificationRecipient
+
+		cfgAPIHost       string
+		cfgLogin         string
+		cfgPassword      string
+		cfgSenderAddress string
+		cfgReplyTo       string
 	}
 
 	// CacheInfo connection information
@@ -69,6 +85,9 @@ type (
 		Address  string
 		Password string
 		DB       int
+
+		cfgAddress  string
+		cfgPassword string
 	}
 
 	// DomainInfo - domain information for LDAP authentication
@@ -110,6 +129,8 @@ type (
 		MaxConnectionIdleTime  *int                   // Max idle connection lifetime
 		Ping                   *bool                  // Ping connection
 		ReservedWordEscapeChar *string                // Reserved word escape chars. For escaping with different opening and closing characters, just set to both. Example. `[]` for SQL server
+
+		cfgConnStr string
 	}
 
 	// NotificationRecipient - notification standard recipients
@@ -179,6 +200,10 @@ var (
 	ErrSaveNotLocalFile = errors.New("configuration file is not local")
 )
 
+var envPattern = regexp.MustCompile(`\$\{[A-Z0-9_]+\}`)
+
+const def string = `DEFAULT`
+
 func load(source string) (*Configuration, error) {
 	config := &Configuration{}
 	if !(strings.HasPrefix(source, `http://`) || strings.HasPrefix(source, `https://`)) {
@@ -219,38 +244,48 @@ func load(source string) (*Configuration, error) {
 		return nil, err
 	}
 
-	const def string = `DEFAULT`
 	if config.DefaultDatabaseID == nil || *config.DefaultDatabaseID == "" {
-		config.DefaultDatabaseID = new_string(def)
+		config.DefaultDatabaseID = newString(def)
 	}
 	if config.DefaultEndpointID == nil || *config.DefaultEndpointID == "" {
-		config.DefaultEndpointID = new_string(def)
+		config.DefaultEndpointID = newString(def)
 	}
 	if config.DefaultNotificationID == nil || *config.DefaultNotificationID == "" {
-		config.DefaultNotificationID = new_string(def)
+		config.DefaultNotificationID = newString(def)
 	}
 	if config.CookieDomain == nil {
-		config.CookieDomain = new_string(`localhost`)
+		config.CookieDomain = newString(`localhost`)
 	}
 	if config.JWTSecret == nil {
-		config.JWTSecret = new_string(`defaultsecretkey`)
+		config.JWTSecret = newString(`defaultsecretkey`)
 	}
 	// Default setting for database
 	if config.Databases != nil {
 		dbs := *config.Databases
 		for i, cd := range dbs {
+			// A database configuration without the connection string is invalid
+			if cd.ConnectionString == "" {
+				continue
+			}
+			// Store loaded connection string
+			// If there are any environment variables, get the system value and set it
+			// Note: If the ConnectionString was modified directly, the stored cfgConnStr
+			// will put the value back if Save() is called
+			cd.cfgConnStr = cd.ConnectionString
+			cd.ConnectionString = interpolateEnvVars(cd.ConnectionString)
+
 			if cd.InterpolateTables == nil {
 				cd.InterpolateTables = new(bool)
 				*cd.InterpolateTables = true
 			}
 			if cd.StringEnclosingChar == nil || *cd.StringEnclosingChar == "" {
-				cd.StringEnclosingChar = new_string(`'`)
+				cd.StringEnclosingChar = newString(`'`)
 			}
 			if cd.StringEscapeChar == nil || *cd.StringEscapeChar == "" {
-				cd.StringEscapeChar = new_string(`\`)
+				cd.StringEscapeChar = newString(`\`)
 			}
 			if cd.ReservedWordEscapeChar == nil || *cd.ReservedWordEscapeChar == "" {
-				cd.ReservedWordEscapeChar = new_string(`"`)
+				cd.ReservedWordEscapeChar = newString(`"`)
 			}
 			if cd.ParameterPlaceholder == "" {
 				cd.ParameterPlaceholder = `?`
@@ -265,7 +300,28 @@ func load(source string) (*Configuration, error) {
 		config.Databases = &dbs
 	}
 
-	// check if there is a notification
+	// Load and parse environment variables set into the values of Address, APIKey and Token
+	if config.APIEndpoints != nil {
+		aep := *config.APIEndpoints
+		for i, ep := range aep {
+			if ep.Address == "" {
+				continue
+			}
+			interpolateEndpoint(&aep[i])
+		}
+		config.APIEndpoints = &aep
+	}
+
+	// Load and parse environment variables set into the values
+	if config.OAuths != nil {
+		oas := *config.OAuths
+		for i := range oas {
+			interpolateOAuth(&oas[i])
+		}
+		config.OAuths = &oas
+	}
+
+	// Load notifications
 	defnum := ""
 	if config.Notifications != nil {
 		nfs := *config.Notifications
@@ -276,8 +332,18 @@ func load(source string) (*Configuration, error) {
 			if cn.ID == "" {
 				nfs[i].ID = def + defnum
 			}
+			interpolateNotifications(&nfs[i])
 		}
 		config.Notifications = &nfs
+	}
+
+	if config.Cache != nil {
+		cac := *config.Cache
+		cac.cfgAddress = cac.Address
+		cac.cfgPassword = cac.Password
+		cac.Address = interpolateEnvVars(cac.cfgAddress)
+		cac.Password = interpolateEnvVars(cac.cfgPassword)
+		config.Cache = &cac
 	}
 
 	config.FileName = source
@@ -286,15 +352,7 @@ func load(source string) (*Configuration, error) {
 
 // GetDatabaseInfo get a database info by its ID
 func (c *Configuration) GetDatabaseInfo(id string) *DatabaseInfo {
-	if c.Databases == nil {
-		return nil
-	}
-	for _, v := range *c.Databases {
-		if v.ID == id {
-			return &v
-		}
-	}
-	return nil
+	return findByID(c.Databases, func(v DatabaseInfo) string { return v.ID }, id)
 }
 
 // GetDatabaseInfoGroup gets database infos based on the group id
@@ -316,15 +374,7 @@ func (c *Configuration) GetDatabaseInfoGroup(groupId string) []DatabaseInfo {
 
 // GetDirectory retrieves a directory under a group
 func (c *Configuration) GetDirectory(groupId string) *DirectoryInfo {
-	if c.Directories == nil || len(*c.Directories) == 0 {
-		return nil
-	}
-	for _, dir := range *c.Directories {
-		if strings.EqualFold(dir.GroupID, groupId) {
-			return &dir
-		}
-	}
-	return nil
+	return findByID(c.Directories, func(v DirectoryInfo) string { return v.GroupID }, groupId)
 }
 
 // GetDirectoryItem retrieves a directory item under a group
@@ -333,9 +383,9 @@ func (c *Configuration) GetDirectoryItem(groupId, key string) *Flag {
 	if dir == nil {
 		return nil
 	}
-	for _, item := range dir.Items {
-		if strings.EqualFold(item.Key, key) {
-			return &item
+	for i := range dir.Items {
+		if strings.EqualFold(dir.Items[i].Key, key) {
+			return &dir.Items[i]
 		}
 	}
 	return nil
@@ -343,15 +393,7 @@ func (c *Configuration) GetDirectoryItem(groupId, key string) *Flag {
 
 // GetDomainInfo gets a domain info by name
 func (c *Configuration) GetDomainInfo(domainName string) *DomainInfo {
-	if c.Domains == nil || domainName == "" {
-		return nil
-	}
-	for _, v := range *c.Domains {
-		if strings.EqualFold(v.Name, domainName) {
-			return &v
-		}
-	}
-	return nil
+	return findByID(c.Domains, func(v DomainInfo) string { return v.Name }, domainName)
 }
 
 // GetEndpointInfo - get an endpoint by id
@@ -363,13 +405,7 @@ func (c *Configuration) GetEndpointInfo(id string) *EndpointInfo {
 	if len(id) > 0 {
 		k = strings.ToLower(id)
 	}
-	eps := *c.APIEndpoints
-	for _, ep := range eps {
-		if strings.EqualFold(k, ep.ID) {
-			return &ep
-		}
-	}
-	return nil
+	return findByID(c.APIEndpoints, func(v EndpointInfo) string { return v.ID }, k)
 }
 
 // GetDatabaseInfoGroup gets database infos based on the group id
@@ -399,9 +435,9 @@ func (c *Configuration) GetNotificationInfo(id string) *NotificationInfo {
 		k = strings.ToLower(id)
 	}
 	nfs := *c.Notifications
-	for _, nf := range nfs {
-		if strings.EqualFold(k, nf.ID) {
-			return &nf
+	for i := range nfs {
+		if strings.EqualFold(k, nfs[i].ID) {
+			return &nfs[i]
 		}
 	}
 	return nil
@@ -409,35 +445,73 @@ func (c *Configuration) GetNotificationInfo(id string) *NotificationInfo {
 
 // GetSourceInfo gets source by id
 func (c *Configuration) GetSourceInfo(id string) *SourceInfo {
-	if c.Sources == nil || id == "" {
-		return nil
-	}
-	for _, v := range *c.Sources {
-		if strings.EqualFold(v.ID, id) {
-			return &v
-		}
-	}
-	return nil
+	return findByID(c.Sources, func(v SourceInfo) string { return v.ID }, id)
 }
 
 // GetOAuthInfo gets an OAuth info by id
 func (c *Configuration) GetOAuthInfo(id string) *OAuthProviderInfo {
-	if c.OAuths == nil || len(*c.OAuths) == 0 || len(id) == 0 {
-		return nil
-	}
-	for _, oa := range *c.OAuths {
-		if strings.EqualFold(id, oa.ID) {
-			return &oa
-		}
-	}
-	return nil
+	return findByID(c.OAuths, func(v OAuthProviderInfo) string { return v.ID }, id)
 }
 
 // Save saves configuration file
 func (c *Configuration) Save() error {
-	if c.local {
+	if !c.local {
 		return ErrSaveNotLocalFile
 	}
+	// Put back the raw connection string to save loaded
+	if c.Databases != nil {
+		for i, db := range *c.Databases {
+			if db.ConnectionString == "" {
+				continue
+			}
+			(*c.Databases)[i].ConnectionString = db.cfgConnStr
+		}
+	}
+	// Put back endpoint info
+	if c.APIEndpoints != nil {
+		aep := *c.APIEndpoints
+		for i, ep := range aep {
+			if ep.Address == "" {
+				continue
+			}
+			// Store loaded values to retrieve later
+			ep.Address = ep.cfgAddress
+			ep.APIKey = ep.cfgAPIKey
+			ep.Token = ep.cfgToken
+			aep[i] = ep
+		}
+		c.APIEndpoints = &aep
+	}
+	if c.OAuths != nil {
+		oas := *c.OAuths
+		for i, oa := range oas {
+			oa.IconUrl = oa.cfgIconUrl
+			oa.ProviderHost = oa.cfgProviderHost
+			oa.ProviderWebUri = oa.cfgProviderWebUri
+			oa.ProviderApiUri = oa.cfgProviderApiUri
+			oas[i] = oa
+		}
+		c.OAuths = &oas
+	}
+	if c.Notifications != nil {
+		nfs := *c.Notifications
+		for i, cn := range nfs {
+			cn.APIHost = cn.cfgAPIHost
+			cn.Login = cn.cfgLogin
+			cn.Password = cn.cfgPassword
+			cn.SenderAddress = cn.cfgSenderAddress
+			cn.ReplyTo = cn.cfgReplyTo
+			nfs[i] = cn
+		}
+		c.Notifications = &nfs
+	}
+	if c.Cache != nil {
+		cac := *c.Cache
+		cac.Address = cac.cfgAddress
+		cac.Password = cac.cfgPassword
+		c.Cache = &cac
+	}
+
 	b, err := json.MarshalIndent(c, "", "\t")
 	if err != nil {
 		return err
@@ -445,6 +519,59 @@ func (c *Configuration) Save() error {
 	if err = os.WriteFile(c.FileName, b, os.ModePerm); err != nil {
 		return err
 	}
+	// Re-interpret the environment variables back
+	if c.Databases != nil {
+		for i, db := range *c.Databases {
+			if db.ConnectionString == "" {
+				continue
+			}
+			(*c.Databases)[i].ConnectionString = interpolateEnvVars(db.cfgConnStr)
+		}
+	}
+	if c.APIEndpoints != nil {
+		aep := *c.APIEndpoints
+		for i, ep := range aep {
+			if ep.Address == "" {
+				continue
+			}
+			interpolateEndpoint(&aep[i])
+		}
+		c.APIEndpoints = &aep
+	}
+
+	if c.OAuths != nil {
+		oas := *c.OAuths
+		for i := range oas {
+			interpolateOAuth(&oas[i])
+		}
+		c.OAuths = &oas
+	}
+
+	if c.Notifications != nil {
+		defnum := ""
+		nfs := *c.Notifications
+		for i, cn := range nfs {
+			if i > 0 {
+				defnum = strconv.Itoa(i)
+			}
+			if cn.ID == "" {
+				nfs[i].ID = def + defnum
+			}
+			interpolateNotifications(&nfs[i])
+		}
+
+		c.Notifications = &nfs
+	}
+
+	if c.Cache != nil {
+		cac := *c.Cache
+		cac.cfgAddress = cac.Address
+		cac.cfgPassword = cac.Password
+		cac.Address = interpolateEnvVars(cac.cfgAddress)
+		cac.Password = interpolateEnvVars(cac.cfgPassword)
+		c.Cache = &cac
+	}
+
 	return nil
 }
 
@@ -455,8 +582,33 @@ func Load(source string) (*Configuration, error) {
 
 // Reload configuration
 func (c *Configuration) Reload() error {
-	_, err := load(c.FileName)
-	return err
+	newConfig, err := load(c.FileName)
+	if err != nil {
+		return err
+	}
+
+	// Copy each field explicitly to avoid overwriting the struct
+	// and breaking references (e.g. pointers held elsewhere).
+	c.Directories = newConfig.Directories
+	c.Flags = newConfig.Flags
+	c.APIEndpoints = newConfig.APIEndpoints
+	c.Databases = newConfig.Databases
+	c.Notifications = newConfig.Notifications
+	c.OAuths = newConfig.OAuths
+	c.Cache = newConfig.Cache
+	c.Queue = newConfig.Queue
+
+	c.ApplicationID = newConfig.ApplicationID
+	c.ApplicationName = newConfig.ApplicationName
+	c.CookieDomain = newConfig.CookieDomain
+	c.JWTSecret = newConfig.JWTSecret
+	c.LicenseSerial = newConfig.LicenseSerial
+	c.ReadTimeout = newConfig.ReadTimeout
+	c.WriteTimeout = newConfig.WriteTimeout
+	c.Secure = newConfig.Secure
+	c.Sources = newConfig.Sources
+
+	return nil
 }
 
 // Flag gets a flag value
@@ -493,6 +645,9 @@ func GetFlag[T FlagTypes](flgs *[]Flag, key string) T {
 	}
 	for _, flg := range *flgs {
 		if strings.EqualFold(flg.Key, key) {
+			if flg.Value == nil {
+				return zero
+			}
 			switch any(*new(T)).(type) {
 			case string:
 				return any(*flg.Value).(T)
@@ -522,8 +677,75 @@ func GetFlag[T FlagTypes](flgs *[]Flag, key string) T {
 	return zero
 }
 
-func new_string(initial string) (init *string) {
+func newString(initial string) (init *string) {
 	init = new(string)
 	*init = initial
 	return
+}
+
+func interpolateEnvVars(text string) string {
+	if text == "" {
+		return text
+	}
+
+	// Replace all matches with actual env values
+	result := envPattern.ReplaceAllStringFunc(text, func(match string) string {
+		// Extract the env var name from ${ENV_NAME}
+		varName := match[2 : len(match)-1]
+		value := os.Getenv(varName)
+		return value // If not set, will return empty string
+	})
+
+	return result
+}
+
+func interpolateEndpoint(ep *EndpointInfo) {
+	ep.cfgAddress = ep.Address
+	ep.cfgAPIKey = ep.APIKey
+	ep.cfgToken = ep.Token
+	ep.Address = interpolateEnvVars(ep.cfgAddress)
+	if ep.cfgAPIKey != nil && ep.APIKey != nil {
+		*ep.APIKey = interpolateEnvVars(*ep.cfgAPIKey)
+	}
+	if ep.cfgToken != nil && ep.Token != nil {
+		*ep.Token = interpolateEnvVars(*ep.cfgToken)
+	}
+}
+
+func interpolateOAuth(oa *OAuthProviderInfo) {
+	oa.cfgIconUrl = oa.IconUrl
+	oa.cfgProviderHost = oa.ProviderHost
+	oa.cfgProviderWebUri = oa.ProviderWebUri
+	oa.cfgProviderApiUri = oa.ProviderApiUri
+
+	oa.IconUrl = interpolateEnvVars(oa.cfgIconUrl)
+	oa.ProviderHost = interpolateEnvVars(oa.cfgProviderHost)
+	oa.ProviderWebUri = interpolateEnvVars(oa.cfgProviderWebUri)
+	oa.ProviderApiUri = interpolateEnvVars(oa.cfgProviderApiUri)
+}
+
+func interpolateNotifications(cn *NotificationInfo) {
+	cn.cfgAPIHost = cn.APIHost
+	cn.cfgLogin = cn.Login
+	cn.cfgPassword = cn.Password
+	cn.cfgSenderAddress = cn.SenderAddress
+	cn.cfgReplyTo = cn.ReplyTo
+
+	cn.APIHost = interpolateEnvVars(cn.cfgAPIHost)
+	cn.Login = interpolateEnvVars(cn.cfgLogin)
+	cn.Password = interpolateEnvVars(cn.cfgPassword)
+	cn.SenderAddress = interpolateEnvVars(cn.cfgSenderAddress)
+	cn.ReplyTo = interpolateEnvVars(cn.cfgReplyTo)
+}
+
+func findByID[T any](slice *[]T, getID func(T) string, id string) *T {
+	if slice == nil || id == "" {
+		return nil
+	}
+	for i := range *slice {
+		if strings.EqualFold(getID((*slice)[i]), id) {
+			return &(*slice)[i]
+		}
+	}
+	return nil
 }

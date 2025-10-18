@@ -30,7 +30,7 @@ func TestLoadConfig(t *testing.T) {
 
 	fmt.Printf("%v+", string(b))
 
-	config.LicenseSerial = new_string("12345678")
+	config.LicenseSerial = newString("12345678")
 
 	apiInfo := config.GetEndpointInfo("DEFAULT")
 	_ = apiInfo
@@ -56,7 +56,7 @@ func TestLoadURLConfig(t *testing.T) {
 
 	fmt.Printf("%v+", string(b))
 
-	config.LicenseSerial = new_string("12345678")
+	config.LicenseSerial = newString("12345678")
 
 	// ok := config.Save()
 	// if !ok {
