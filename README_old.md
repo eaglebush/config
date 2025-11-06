@@ -1,6 +1,7 @@
 # 📦 cfg — Flexible Configuration Loader for Go
 
-`cfg` is a lightweight yet powerful Go package for loading, managing, and saving application configuration files. It supports **local and remote JSON configurations**, **environment variable interpolation**, and provides a rich set of accessor functions for structured configuration data.
+`cfg` is a lightweight yet powerful Go package for loading, managing, and saving application configuration files.
+It supports **local and remote JSON configurations**, **environment variable interpolation**, and provides a rich set of accessor functions for structured configuration data.
 
 ---
 
@@ -14,15 +15,12 @@
   - Directories
   - Notifications
   - Caching
-  - Secrets
-  - Queues
   - Flags and more
 - 🔄 Environment variable interpolation using `${VAR_NAME}` syntax
 - 💾 Save configuration back to disk (local files only)
 - 🔁 Hot **reload** configuration without restarting the application
 - 🧠 Access helpers for common lookups (e.g., `GetDatabaseInfo`, `GetEndpointInfo`)
 - 🧰 Type-safe flag retrieval with `GetFlag[T]`
-- 🧩 Built-in defaults for common configuration values (e.g., IDs, cookie domain, secrets)
 
 ---
 
@@ -103,7 +101,7 @@ if err != nil {
 }
 ```
 
-> ⚠️ Saving is only supported for **local configuration files**. Remote URLs are read-only.
+> ⚠️ Saving is only supported for **local configuration files**.
 
 ---
 
@@ -136,14 +134,13 @@ The `Configuration` struct exposes various helper methods:
 | `GetNotificationInfo(id string)` | Get notification by ID (uses default if empty) |
 | `GetSourceInfo(id string)` | Get source by ID |
 | `GetOAuthInfo(id string)` | Get OAuth provider by ID |
-| `GetSecretInfo(id string)` | Get secret by ID |
-| `GetSecretInfoGroup(groupId string)` | Get secrets by group ID |
 
 ---
 
 ## 🏷 Flags
 
-The configuration can include a list of `Flags` for miscellaneous values. You can retrieve them safely with type inference:
+The configuration can include a list of `Flags` for miscellaneous values.
+You can retrieve them safely with type inference:
 
 ```go
 value := cfg.GetFlag[string](conf.Flags, "SOME_KEY")
@@ -152,13 +149,11 @@ timeout := cfg.GetFlag[int](conf.Flags, "TIMEOUT")
 
 If the flag is missing or can't be converted, a **zero value** is returned.
 
-Additionally, `Configuration.Flag(key)` provides a convenient way to find a flag by key, ignoring underscores and dashes.
-
 ---
 
 ## 🧠 Environment Variable Interpolation
 
-The following fields support `${ENV}` placeholders:
+All the following fields support `${ENV}` placeholders:
 
 - `DatabaseInfo.ConnectionString`
 - `EndpointInfo.Address`, `APIKey`, `Token`
@@ -166,24 +161,11 @@ The following fields support `${ENV}` placeholders:
 - `NotificationInfo.APIHost`, `Login`, `Password`, `SenderAddress`, `ReplyTo`
 - `CacheInfo.Address`, `Password`
 
-Values are interpolated **once on load**, and then **restored to original values** before saving.
-
-### Example
-```json
-{
-  "APIEndpoints": [
-    {
-      "ID": "DEFAULT",
-      "Address": "https://${API_HOST}/v1",
-      "APIKey": "${API_KEY}"
-    }
-  ]
-}
-```
+Values are interpolated **once on load**, and then restored before saving.
 
 ---
 
-## 🧩 Struct Overview
+## 🧰 Struct Overview
 
 `Configuration` is the central struct:
 
@@ -198,27 +180,11 @@ type Configuration struct {
 	Directories           *[]DirectoryInfo
 	Flags                 *[]Flag
 	Cache                 *CacheInfo
-	Secrets               *[]SecretInfo
-	Sources               *[]SourceInfo
-	Queue                 *QueueInfo
-	CookieDomain          *string
-	JWTSecret             *string
-	Secure                *bool
-	ReadTimeout           *int
-	WriteTimeout          *int
+	// ... and more
 }
 ```
 
-### Supporting Types
-
-- `DatabaseInfo` — defines connection details, pooling, and SQL formatting options.
-- `EndpointInfo` — represents API endpoints with optional `APIKey`, `Token`, and attached secrets.
-- `OAuthProviderInfo` — stores OAuth2 client and provider details.
-- `NotificationInfo` — holds notification service connection settings.
-- `CacheInfo` — caching backend information.
-- `QueueInfo` — queue/streaming configuration.
-- `SecretInfo` — grouped secrets for secure data.
-- `DirectoryInfo` — configuration for grouped flags.
+Each section (e.g. `DatabaseInfo`, `EndpointInfo`) has its own well-defined fields for easy JSON marshalling and unmarshalling.
 
 ---
 
@@ -249,59 +215,7 @@ type Configuration struct {
 
 ---
 
-## ⚙️ Defaults
-
-When a configuration is loaded, default values are applied where missing:
-
-| Field | Default Value |
-|--------|----------------|
-| `DefaultDatabaseID` | `DEFAULT` |
-| `DefaultEndpointID` | `DEFAULT` |
-| `DefaultNotificationID` | `DEFAULT` |
-| `CookieDomain` | `localhost` |
-| `JWTSecret` | `defaultsecretkey` |
-| `DatabaseInfo.StorageType` | `SERVER` |
-| `DatabaseInfo.InterpolateTables` | `true` |
-| `DatabaseInfo.StringEnclosingChar` | `'` |
-| `DatabaseInfo.StringEscapeChar` | `\\` |
-| `DatabaseInfo.ReservedWordEscapeChar` | `"` |
-
----
-
-## ⚠️ Error Handling
-
-| Error | Meaning |
-|-------|----------|
-| `ErrNoDataFromSource` | No data was read from the configuration source |
-| `ErrSaveNotLocalFile` | Tried to save a remote (non-local) configuration |
-
----
-
-## 🧩 Internal Helpers
-
-### `interpolateEnvVars`
-Replaces `${ENV_VAR}` tokens in text with values from `os.Getenv()`.
-
-### `findByID`
-Generic helper that finds structs in a slice by a string ID (case-insensitive).
-
----
-
-## 🧠 Thread Safety
-The `Configuration` type is **not thread-safe**. Use synchronization (like `sync.RWMutex`) when accessing or modifying configuration concurrently.
-
----
-
-## 🧰 Testing Tips
-
-- Use temporary files for `Load()`/`Save()` tests.
-- Use `t.Setenv()` to mock environment variables.
-- Confirm that saved JSON preserves **uninterpolated** values.
-- Validate that in-memory state remains **interpolated** post-save.
-
----
-
-## 🧾 License
+## 📝 License
 
 MIT — feel free to use, modify, and contribute.
 
@@ -309,11 +223,11 @@ MIT — feel free to use, modify, and contribute.
 
 ## 🤝 Contributing
 
-Pull requests and issues are welcome. Please run `go fmt ./...` before submitting any changes.
+Pull requests and issues are welcome.
+Please make sure to run `go fmt ./...` before submitting any changes.
 
 ---
 
-## 👤 Author
+## 🧠 Author
 
 Developed and maintained by **[Elizalde Baguinon](https://github.com/eaglebush)**.
-

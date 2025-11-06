@@ -12,26 +12,23 @@ import (
 )
 
 type (
-	// DatabaseKeyword for database keywords
-	DatabaseKeyword struct {
-		Flag
-	}
-
 	// DirectoryInfo contains a directory info configuration
 	DirectoryInfo struct {
-		GroupID     string
-		Description string
-		Items       []Flag
+		GroupID     string // Group id of the directory
+		Description string // Description of the directory
+		Items       []Flag // Item flags of this directory
 	}
 
 	// EndpointInfo contains an endpoint info configuration
 	EndpointInfo struct {
-		ID      string  // Endpoint ID for quick access
-		Name    string  // Endpoint Name to show
-		Address string  // The absolute URL to the resource
-		GroupID *string // A group id to get certain endpoint set
-		Token   *string // A static JWT token for instant access
-		APIKey  *string // An API key for the endpoint
+		ID      string        // Endpoint ID for quick access
+		Name    string        // Endpoint Name to show
+		Address string        // The absolute URL to the resource
+		GroupID *string       // A group id to get certain endpoint set
+		Token   *string       // A static JWT token for instant access
+		APIKey  *string       // An API key for the endpoint
+		Secrets *[]SecretInfo // Secrets for any or each part of an API
+		Flags   *[]Flag       // Miscellaneous flags inclusive to this endpoint
 
 		cfgAddress string
 		cfgToken   *string
@@ -60,17 +57,17 @@ type (
 
 	// NotificationInfo - notification information on connecting to Notify API
 	NotificationInfo struct {
-		ID            string
-		APIHost       string
-		APIPath       string
-		Type          string
-		Login         string
-		Password      string
-		Active        bool
-		SenderAddress string
-		SenderName    string
-		ReplyTo       string
-		Recipients    []NotificationRecipient
+		ID            string                  // ID of the notification application
+		APIHost       string                  // API host of the notification application
+		APIPath       string                  // API path of the notification application
+		Type          string                  // Notification type (E-mail or messaging)
+		Login         string                  // Login credential
+		Password      string                  // Password of the login credential
+		Active        bool                    // Tags if the notification configuration is active
+		SenderAddress string                  // Sender address or id
+		SenderName    string                  // Sender name
+		ReplyTo       string                  // Reply to address
+		Recipients    []NotificationRecipient // Recipients
 
 		cfgAPIHost       string
 		cfgLogin         string
@@ -135,9 +132,9 @@ type (
 
 	// NotificationRecipient - notification standard recipients
 	NotificationRecipient struct {
-		ID      string
-		Name    string
-		Address string
+		ID      string // ID of the recipient
+		Name    string // Name of the recipient
+		Address string // E-mail address or any identity for notification
 	}
 
 	// QueueInfo - queue info connector
@@ -147,6 +144,14 @@ type (
 		Cluster            string   // Cluster name
 		ClientID           string   // ClientID of the service
 		StreamName         string   // Stream name
+	}
+
+	// SecretInfo identifies the secrets for application use
+	SecretInfo struct {
+		GroupID *string // GroupID allows to get secrets in group
+		ID      string  // ID of the secret
+		Name    string  // Name of the secret
+		Value   string  // Value of the secret
 	}
 
 	// SourceInfo - file sources for configuration
@@ -162,36 +167,100 @@ type (
 
 	// Configuration
 	Configuration struct {
-		APIEndpoints          *[]EndpointInfo      // External API endpoints that this application can communicate
-		ApplicationID         *string              // ID of this application
-		ApplicationName       *string              // Name of this application
-		ApplicationTheme      *string              // Theme of this application
-		Cache                 *CacheInfo           // Cache info of this application
-		CertificateFile       *string              // Certificate file
-		CertificateKey        *string              // Certificate private key
-		CookieDomain          *string              // The domain of the cookie that this application will send
-		CrossOriginDomains    *[]string            // Domains or endpoints that this application will allow
-		Databases             *[]DatabaseInfo      // Configured databases for this application use
-		Directories           *[]DirectoryInfo     // Configured directory for this application use
-		DefaultDatabaseID     *string              // The default database id that this application will find on the database configuration
-		DefaultEndpointID     *string              // The default endpoint that this application will find on the API endpoints configuration
-		DefaultNotificationID *string              // The default notification id that this application will find on the notification configuration
-		Domains               *[]DomainInfo        // Configured domains for this application use
-		FileName              string               // Filename of the current configuration
-		Flags                 *[]Flag              // Miscellaneous flags for this application use
-		HostInternalURL       *string              // The internal host URL that this application will use to set returned resources and assets
-		HostExternalURL       *string              // The external host URL that this application will use to set returned resources and assets
-		HostPort              *int                 // The network port for the application
-		JWTSecret             *string              // Application wide JSON Web Token (JT) secret
-		LicenseSerial         *string              // License serial of this application
-		Notifications         *[]NotificationInfo  // Configured notifications for this application use
-		OAuths                *[]OAuthProviderInfo // OAuth definitions
-		Queue                 *QueueInfo           // Queue or message queue
-		ReadTimeout           *int                 // Default network timeout setting for reading data uploaded to this application
-		Secure                *bool                // Flags if secure
-		Sources               *[]SourceInfo        // Folder sources
-		WriteTimeout          *int                 // Default network timeout setting for writing data downloaded from this application
-		local                 bool                 // Local file
+		// External API endpoints that this application can communicate
+		APIEndpoints *[]EndpointInfo
+
+		// ID of this application
+		ApplicationID *string
+
+		// Name of this application
+		ApplicationName *string
+
+		// Theme of this application
+		ApplicationTheme *string
+
+		// Cache info of this application
+		Cache *CacheInfo
+
+		// Certificate file
+		CertificateFile *string
+
+		// Certificate private key
+		CertificateKey *string
+
+		// The domain of the cookie that this application will send
+		CookieDomain *string
+
+		// Domains or endpoints that this application will allow
+		CrossOriginDomains *[]string
+
+		// Configured databases for this application use
+		Databases *[]DatabaseInfo
+
+		// Configured directory for this application use
+		Directories *[]DirectoryInfo
+
+		// The default database id that this application will find on the database configuration
+		DefaultDatabaseID *string
+
+		// The default endpoint that this application will find on the API endpoints configuration
+		DefaultEndpointID *string
+
+		// The default notification id that this application will find on the notification configuration
+		DefaultNotificationID *string
+
+		// Configured domains for this application use
+		Domains *[]DomainInfo
+
+		// Filename of the current configuration
+		FileName string
+
+		// Miscellaneous flags for this application use
+		Flags *[]Flag
+
+		// The internal host URL that this application will use to set returned resources and assets
+		HostInternalURL *string
+
+		// The external host URL that this application will use to set returned resources and assets
+		HostExternalURL *string
+
+		// The network port for the application
+		HostPort *int
+
+		// Application wide JSON Web Token (JT) secret
+		//
+		// Deprecated: Use Secrets instead
+		JWTSecret *string
+
+		// License serial of this application
+		LicenseSerial *string
+
+		// Configured notifications for this application use
+		Notifications *[]NotificationInfo
+
+		// OAuth definitions
+		OAuths *[]OAuthProviderInfo
+
+		// Queue or message queue
+		Queue *QueueInfo
+
+		// Default network timeout setting for reading data uploaded to this application
+		ReadTimeout *int
+
+		// Configured secrets for this application
+		Secrets *[]SecretInfo
+
+		// Flags if secure
+		Secure *bool
+
+		// Folder sources
+		Sources *[]SourceInfo
+
+		// Default network timeout setting for writing data downloaded from this application
+		WriteTimeout *int
+
+		// Local file
+		local bool
 	}
 )
 
@@ -589,24 +658,24 @@ func (c *Configuration) Reload() error {
 
 	// Copy each field explicitly to avoid overwriting the struct
 	// and breaking references (e.g. pointers held elsewhere).
-	c.Directories = newConfig.Directories
-	c.Flags = newConfig.Flags
 	c.APIEndpoints = newConfig.APIEndpoints
-	c.Databases = newConfig.Databases
-	c.Notifications = newConfig.Notifications
-	c.OAuths = newConfig.OAuths
-	c.Cache = newConfig.Cache
-	c.Queue = newConfig.Queue
-
 	c.ApplicationID = newConfig.ApplicationID
 	c.ApplicationName = newConfig.ApplicationName
+	c.Cache = newConfig.Cache
 	c.CookieDomain = newConfig.CookieDomain
+	c.Databases = newConfig.Databases
+	c.Directories = newConfig.Directories
+	c.Flags = newConfig.Flags
 	c.JWTSecret = newConfig.JWTSecret
 	c.LicenseSerial = newConfig.LicenseSerial
+	c.Notifications = newConfig.Notifications
+	c.OAuths = newConfig.OAuths
+	c.Queue = newConfig.Queue
 	c.ReadTimeout = newConfig.ReadTimeout
-	c.WriteTimeout = newConfig.WriteTimeout
 	c.Secure = newConfig.Secure
 	c.Sources = newConfig.Sources
+	c.Secrets = newConfig.Secrets
+	c.WriteTimeout = newConfig.WriteTimeout
 
 	return nil
 }
@@ -644,37 +713,84 @@ func GetFlag[T FlagTypes](flgs *[]Flag, key string) T {
 		return zero
 	}
 	for _, flg := range *flgs {
-		if strings.EqualFold(flg.Key, key) {
-			if flg.Value == nil {
-				return zero
-			}
-			switch any(*new(T)).(type) {
-			case string:
-				return any(*flg.Value).(T)
-			case int:
-				v, _ := strconv.Atoi(*flg.Value)
-				return any(v).(T)
-			case int32:
-				v, _ := strconv.ParseInt(*flg.Value, 10, 32)
-				return any(v).(T)
-			case int64:
-				v, _ := strconv.ParseInt(*flg.Value, 10, 64)
-				return any(v).(T)
-			case bool:
-				v, _ := strconv.ParseBool(*flg.Value)
-				return any(v).(T)
-			case float32:
-				v, _ := strconv.ParseFloat(*flg.Value, 32)
-				return any(v).(T)
-			case float64:
-				v, _ := strconv.ParseFloat(*flg.Value, 64)
-				return any(v).(T)
-			default:
-				return zero
-			}
+		if !strings.EqualFold(flg.Key, key) {
+			continue
 		}
+		if flg.Value == nil {
+			return zero
+		}
+
+		switch any(*new(T)).(type) {
+		case string:
+			return any(*flg.Value).(T)
+		case int:
+			v, _ := strconv.Atoi(*flg.Value)
+			return any(v).(T)
+		case int32:
+			v, _ := strconv.ParseInt(*flg.Value, 10, 32)
+			return any(v).(T)
+		case int64:
+			v, _ := strconv.ParseInt(*flg.Value, 10, 64)
+			return any(v).(T)
+		case bool:
+			v, _ := strconv.ParseBool(*flg.Value)
+			return any(v).(T)
+		case float32:
+			v, _ := strconv.ParseFloat(*flg.Value, 32)
+			return any(v).(T)
+		case float64:
+			v, _ := strconv.ParseFloat(*flg.Value, 64)
+			return any(v).(T)
+		default:
+			return zero
+		}
+
 	}
 	return zero
+}
+
+// GetSecretInfo get a secret info by its ID
+func (c *Configuration) GetSecretInfo(id string) *SecretInfo {
+	return findByID(c.Secrets, func(v SecretInfo) string { return v.ID }, id)
+}
+
+// GetSecretInfoGroup gets secret infos based on the group id
+func (c *Configuration) GetSecretInfoGroup(groupId string) []SecretInfo {
+	scts := make([]SecretInfo, 0)
+	if c.Secrets == nil || groupId == "" {
+		return scts
+	}
+	for _, v := range *c.Secrets {
+		if v.GroupID == nil {
+			continue
+		}
+		if strings.EqualFold(*v.GroupID, groupId) {
+			scts = append(scts, v)
+		}
+	}
+	return scts
+}
+
+// GetSecretInfo get a secret info by its ID
+func (c *EndpointInfo) GetSecretInfo(id string) *SecretInfo {
+	return findByID(c.Secrets, func(v SecretInfo) string { return v.ID }, id)
+}
+
+// GetSecretInfoGroup gets secret infos based on the group id
+func (c *EndpointInfo) GetSecretInfoGroup(groupId string) []SecretInfo {
+	scts := make([]SecretInfo, 0)
+	if c.Secrets == nil || groupId == "" {
+		return scts
+	}
+	for _, v := range *c.Secrets {
+		if v.GroupID == nil {
+			continue
+		}
+		if strings.EqualFold(*v.GroupID, groupId) {
+			scts = append(scts, v)
+		}
+	}
+	return scts
 }
 
 func newString(initial string) (init *string) {

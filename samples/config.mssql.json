@@ -2,7 +2,13 @@
     "APIEndpoints": [
         {
             "ID": "DEFAULT",
-            "Address": "http://localhost:8012/"
+            "Address": "http://localhost:8012/",
+			"Secrets": [
+				{
+					"ID": "DEFAULT",
+					"Value": "191919191919"
+				}
+			]
         },
         {
             "ID": "INBOUND",
@@ -150,5 +156,11 @@
 		"Address": "",
 		"Password": "",
 		"DB": 0
-	}
+	},
+	"Secrets": [
+		{
+			"ID": "DEFAULT",
+			"Value": "2020202020"
+		}
+	]
 }
