@@ -749,6 +749,96 @@ func GetFlag[T FlagTypes](flgs *[]Flag, key string) T {
 	return zero
 }
 
+// normalizeFieldName normalizes a field name for lookup:
+// - lowercases
+// - removes spaces, underscores, and dashes
+func normalizeFieldName(name string) string {
+	name = strings.ToLower(name)
+	name = strings.TrimSpace(name)
+	name = strings.ReplaceAll(name, " ", "")
+	name = strings.ReplaceAll(name, "_", "")
+	name = strings.ReplaceAll(name, "-", "")
+	return name
+}
+
+// GetField safely retrieve a field in the configuration value and return it converted to type indicated.
+func GetField[T any](config *Configuration, fieldName string) T {
+	var zv T
+	if config == nil || fieldName == "" {
+		return zv
+	}
+
+	var v any
+	switch normalizeFieldName(fieldName) {
+	case "apiendpoints":
+		v = config.APIEndpoints
+	case "applicationid":
+		v = config.ApplicationID
+	case "applicationname":
+		v = config.ApplicationName
+	case "applicationtheme":
+		v = config.ApplicationTheme
+	case "cache":
+		v = config.Cache
+	case "certificatefile":
+		v = config.CertificateFile
+	case "certificatekey":
+		v = config.CertificateKey
+	case "cookiedomain":
+		v = config.CookieDomain
+	case "crossorigindomains":
+		v = config.CrossOriginDomains
+	case "databases":
+		v = config.Databases
+	case "directories":
+		v = config.Directories
+	case "defaultdatabaseid":
+		v = config.DefaultDatabaseID
+	case "defaultendpointid":
+		v = config.DefaultEndpointID
+	case "defaultnotificationid":
+		v = config.DefaultNotificationID
+	case "domains":
+		v = config.Domains
+	case "flags":
+		v = config.Flags
+	case "hostinternalurl":
+		v = config.HostInternalURL
+	case "hostexternalurl":
+		v = config.HostExternalURL
+	case "hostport":
+		v = config.HostPort
+	case "licenseserial":
+		v = config.LicenseSerial
+	case "notifications":
+		v = config.Notifications
+	case "oauths":
+		v = config.OAuths
+	case "queue":
+		v = config.Queue
+	case "readtimeout":
+		v = config.ReadTimeout
+	case "secrets":
+		v = config.Secrets
+	case "secure":
+		v = config.Secure
+	case "sources":
+		v = config.Sources
+	case "writetimeout":
+		v = config.WriteTimeout
+	default:
+		return zv
+	}
+
+	// Now enforce that v matches T
+	if cast, ok := v.(T); ok {
+		return cast
+	}
+
+	// Wrong type requested → return zero value
+	return zv
+}
+
 // GetSecretInfo get a secret info by its ID
 func (c *Configuration) GetSecretInfo(id string) *SecretInfo {
 	return findByID(c.Secrets, func(v SecretInfo) string { return v.ID }, id)
