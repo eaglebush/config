@@ -63,3 +63,19 @@ func TestLoadURLConfig(t *testing.T) {
 	// 	fmt.Printf("%s", config.LastErrorText())
 	// }
 }
+
+func TestGetField(t *testing.T) {
+	config, err := Load("samples/config.mssql.json")
+	if err != nil {
+		t.Fail()
+		t.Fatalf(`Error %v`, err)
+	}
+
+	f := GetField[CacheInfo](config, "cache")
+	_ = f
+
+	// ok := config.Save()
+	// if !ok {
+	// 	fmt.Printf("%s", config.LastErrorText())
+	// }
+}

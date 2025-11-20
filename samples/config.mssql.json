@@ -153,9 +153,9 @@
 	},
 	"Cache": {
 		"Provider": "redis",
-		"Address": "",
-		"Password": "",
-		"DB": 0
+		"Address": "192.168.1.73",
+		"Password": "passwd",
+		"DB": 11
 	},
 	"Secrets": [
 		{
