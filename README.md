@@ -16,7 +16,8 @@
   - Caching
   - Secrets
   - Queues
-  - Flags and more
+  - Flags
+  - FlagGroups and more
 - 🔄 Environment variable interpolation using `${VAR_NAME}` syntax
 - 💾 Save configuration back to disk (local files only)
 - 🔁 Hot **reload** configuration without restarting the application
@@ -133,6 +134,7 @@ The `Configuration` struct exposes various helper methods:
 | `GetDirectory(groupId string)` | Get directory by group ID |
 | `GetDirectoryItem(groupId, key string)` | Get specific directory item |
 | `GetDomainInfo(name string)` | Get domain info |
+| `GetFlagGroupFlags(groupId string)` | Gets flags from defined group |
 | `GetNotificationInfo(id string)` | Get notification by ID (uses default if empty) |
 | `GetSourceInfo(id string)` | Get source by ID |
 | `GetOAuthInfo(id string)` | Get OAuth provider by ID |
@@ -197,6 +199,7 @@ type Configuration struct {
 	OAuths                *[]OAuthProviderInfo
 	Directories           *[]DirectoryInfo
 	Flags                 *[]Flag
+	FlagGroups            *[]FlagGroup
 	Cache                 *CacheInfo
 	Secrets               *[]SecretInfo
 	Sources               *[]SourceInfo
@@ -255,9 +258,6 @@ When a configuration is loaded, default values are applied where missing:
 
 | Field | Default Value |
 |--------|----------------|
-| `DefaultDatabaseID` | `DEFAULT` |
-| `DefaultEndpointID` | `DEFAULT` |
-| `DefaultNotificationID` | `DEFAULT` |
 | `CookieDomain` | `localhost` |
 | `JWTSecret` | `defaultsecretkey` |
 | `DatabaseInfo.StorageType` | `SERVER` |

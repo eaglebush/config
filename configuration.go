@@ -200,15 +200,6 @@ type (
 		// Configured directory for this application use
 		Directories *[]DirectoryInfo
 
-		// The default database id that this application will find on the database configuration
-		DefaultDatabaseID *string
-
-		// The default endpoint that this application will find on the API endpoints configuration
-		DefaultEndpointID *string
-
-		// The default notification id that this application will find on the notification configuration
-		DefaultNotificationID *string
-
 		// Configured domains for this application use
 		Domains *[]DomainInfo
 
@@ -217,6 +208,9 @@ type (
 
 		// Miscellaneous flags for this application use
 		Flags *[]Flag
+
+		// Flags that are grouped by ID for miscellaneous settings
+		FlagGroups *[]FlagGroup
 
 		// The internal host URL that this application will use to set returned resources and assets
 		HostInternalURL *string
@@ -313,15 +307,6 @@ func load(source string) (*Configuration, error) {
 		return nil, err
 	}
 
-	if config.DefaultDatabaseID == nil || *config.DefaultDatabaseID == "" {
-		config.DefaultDatabaseID = newString(def)
-	}
-	if config.DefaultEndpointID == nil || *config.DefaultEndpointID == "" {
-		config.DefaultEndpointID = newString(def)
-	}
-	if config.DefaultNotificationID == nil || *config.DefaultNotificationID == "" {
-		config.DefaultNotificationID = newString(def)
-	}
 	if config.CookieDomain == nil {
 		config.CookieDomain = newString(`localhost`)
 	}
@@ -467,10 +452,10 @@ func (c *Configuration) GetDomainInfo(domainName string) *DomainInfo {
 
 // GetEndpointInfo - get an endpoint by id
 func (c *Configuration) GetEndpointInfo(id string) *EndpointInfo {
-	if c.APIEndpoints == nil || (len(id) == 0 && (c.DefaultEndpointID == nil || *c.DefaultEndpointID == "")) {
+	if c.APIEndpoints == nil || len(id) == 0 {
 		return nil
 	}
-	k := strings.ToLower(*c.DefaultEndpointID)
+	k := strings.ToLower(def)
 	if len(id) > 0 {
 		k = strings.ToLower(id)
 	}
@@ -494,12 +479,27 @@ func (c *Configuration) GetEndpointInfoGroup(groupId string) []EndpointInfo {
 	return eps
 }
 
+// GetFlagGroupFlags gets flags from defined group based on the group id
+func (c *Configuration) GetFlagGroupFlags(groupId string) []Flag {
+	flgs := make([]Flag, 0, 10)
+	if c.FlagGroups == nil || groupId == "" {
+		return flgs
+	}
+	for _, v := range *c.FlagGroups {
+		if v.GroupID == "" || !strings.EqualFold(v.GroupID, groupId) {
+			continue
+		}
+		return append(flgs, v.Flags...)
+	}
+	return flgs
+}
+
 // GetNotificationInfo gets notification info
 func (c *Configuration) GetNotificationInfo(id string) *NotificationInfo {
-	if c.Notifications == nil || (len(id) == 0 && (c.DefaultNotificationID == nil || *c.DefaultNotificationID == "")) {
+	if c.Notifications == nil || len(id) == 0 {
 		return nil
 	}
-	k := strings.ToLower(*c.DefaultNotificationID)
+	k := strings.ToLower(def)
 	if len(id) > 0 {
 		k = strings.ToLower(id)
 	}
@@ -676,6 +676,7 @@ func (c *Configuration) Reload() error {
 	c.Sources = newConfig.Sources
 	c.Secrets = newConfig.Secrets
 	c.WriteTimeout = newConfig.WriteTimeout
+	c.FlagGroups = newConfig.FlagGroups
 
 	return nil
 }
@@ -792,16 +793,12 @@ func GetField[T any](config *Configuration, fieldName string) T {
 		v = config.Databases
 	case "directories":
 		v = config.Directories
-	case "defaultdatabaseid":
-		v = config.DefaultDatabaseID
-	case "defaultendpointid":
-		v = config.DefaultEndpointID
-	case "defaultnotificationid":
-		v = config.DefaultNotificationID
 	case "domains":
 		v = config.Domains
 	case "flags":
 		v = config.Flags
+	case "flaggroups":
+		v = config.FlagGroups
 	case "hostinternalurl":
 		v = config.HostInternalURL
 	case "hostexternalurl":

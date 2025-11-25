@@ -11,6 +11,10 @@ type (
 		Key   string  `json:"key,omitempty"`
 		Value *string `json:"value,omitempty"`
 	}
+	FlagGroup struct {
+		GroupID string `json:"group_id,omitempty"`
+		Flags   []Flag `json:"flags,omitempty"`
+	}
 	FlagTypes interface {
 		string | int | int32 | int64 | bool | float32 | float64
 	}
