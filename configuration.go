@@ -152,6 +152,8 @@ type (
 		ID      string  // ID of the secret
 		Name    string  // Name of the secret
 		Value   string  // Value of the secret
+
+		cfgValue string
 	}
 
 	// SourceInfo - file sources for configuration
@@ -400,6 +402,16 @@ func load(source string) (*Configuration, error) {
 		config.Cache = &cac
 	}
 
+	if config.Secrets != nil {
+		scts := *config.Secrets
+		for i, sct := range scts {
+			sct.cfgValue = sct.Value
+			sct.Value = interpolateEnvVars(sct.cfgValue)
+			scts[i] = sct
+		}
+		config.Secrets = &scts
+	}
+
 	config.FileName = source
 	return config, nil
 }
@@ -580,6 +592,14 @@ func (c *Configuration) Save() error {
 		cac.Password = cac.cfgPassword
 		c.Cache = &cac
 	}
+	if c.Secrets != nil {
+		scts := *c.Secrets
+		for i, sct := range scts {
+			sct.Value = sct.cfgValue
+			scts[i] = sct
+		}
+		c.Secrets = &scts
+	}
 
 	b, err := json.MarshalIndent(c, "", "\t")
 	if err != nil {
@@ -639,6 +659,16 @@ func (c *Configuration) Save() error {
 		cac.Address = interpolateEnvVars(cac.cfgAddress)
 		cac.Password = interpolateEnvVars(cac.cfgPassword)
 		c.Cache = &cac
+	}
+
+	if c.Secrets != nil {
+		scts := *c.Secrets
+		for i, sct := range scts {
+			sct.cfgValue = sct.Value
+			sct.Value = interpolateEnvVars(sct.cfgValue)
+			scts[i] = sct
+		}
+		c.Secrets = &scts
 	}
 
 	return nil
