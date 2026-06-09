@@ -23,10 +23,10 @@ type (
 	EndpointInfo struct {
 		ID      string        // Endpoint ID for quick access
 		Name    string        // Endpoint Name to show
-		Address string        // The absolute URL to the resource
+		Address string        // The absolute URL to the resource. Can be set via environment variable.
 		GroupID *string       // A group id to get certain endpoint set
-		Token   *string       // A static JWT token for instant access
-		APIKey  *string       // An API key for the endpoint
+		Token   *string       // A static JWT token for instant access. Can be set via environment variable.
+		APIKey  *string       // An API key for the endpoint. Can be set via environment variable.
 		Secrets *[]SecretInfo // Secrets for any or each part of an API
 		Flags   *[]Flag       // Miscellaneous flags inclusive to this endpoint
 
@@ -39,13 +39,13 @@ type (
 	OAuthProviderInfo struct {
 		ID             string // OAuth provider info id for quick access
 		Name           string // OAuth name for miscellaneous purposes
-		IconUrl        string // OAuth icon image for miscellaneous purposes
+		IconUrl        string // OAuth icon image for miscellaneous purposes. Can be set via environment variable.
 		EmbedText      string // OAuth embed options
 		Label          string // OAuth label for visual controls
 		ClientID       string // Represents the application id registered in an OAuth provider
-		ProviderHost   string // The host name of the provider. This is useful to get assets from the provider.
-		ProviderWebUri string // The web URI to get authorization and access keys
-		ProviderApiUri string // The API URI to get authorization and access keys
+		ProviderHost   string // The host name of the provider. This is useful to get assets from the provider. Can be set via environment variable.
+		ProviderWebUri string // The web URI to get authorization and access keys. Can be set via environment variable.
+		ProviderApiUri string // The API URI to get authorization and access keys. Can be set via environment variable.
 		ResponseType   string // The type of response that the application needs from the OAuth provider
 		Scope          string // The scope of access to resources
 
@@ -58,18 +58,20 @@ type (
 	// NotificationInfo - notification information on connecting to Notify API
 	NotificationInfo struct {
 		ID            string                  // ID of the notification application
-		APIHost       string                  // API host of the notification application
-		APIPath       string                  // API path of the notification application
+		APIHost       string                  // API host of the notification application. Can be set via environment variable.
+		APIPath       string                  // API path of the notification application. Can be set via environment variable.
+		APIToken      string                  // API JWT token. Can be set via environment variable.
 		Type          string                  // Notification type (E-mail or messaging)
-		Login         string                  // Login credential
-		Password      string                  // Password of the login credential
+		Login         string                  // Login credential. Can be set via environment variable.
+		Password      string                  // Password of the login credential. Can be set via environment variable.
 		Active        bool                    // Tags if the notification configuration is active
-		SenderAddress string                  // Sender address or id
+		SenderAddress string                  // Sender address or id. Can be set via environment variable.
 		SenderName    string                  // Sender name
-		ReplyTo       string                  // Reply to address
+		ReplyTo       string                  // Reply to address. Can be set via environment variable.
 		Recipients    []NotificationRecipient // Recipients
 
 		cfgAPIHost       string
+		cfgAPIToken      string
 		cfgLogin         string
 		cfgPassword      string
 		cfgSenderAddress string
@@ -79,8 +81,8 @@ type (
 	// CacheInfo connection information
 	CacheInfo struct {
 		Provider string
-		Address  string
-		Password string
+		Address  string // Host or IP of the cache server. Can be set via environment variable.
+		Password string // Password for the cache server. Can be set via environment variable.
 		DB       int
 
 		cfgAddress  string
@@ -109,7 +111,7 @@ type (
 	DatabaseInfo struct {
 		GroupID                *string                // GroupID allows us to get groups of connection
 		ID                     string                 // A unique ID that will identify the connection to a database
-		ConnectionString       string                 // ConnectionString specific to the database
+		ConnectionString       string                 // ConnectionString specific to the database. Can be set via environment variable.
 		DriverName             string                 // DriverName needs to be specified depending on the driver id used by the Go database driver
 		StorageType            string                 // FILE for filebased database such as Access, SQlite or LocalDB. SERVER for SQL Server, MySQL etc
 		HelperID               string                 // When using github.com/NarsilWorks-Inc/datahelperlite, this is needed in the configuration file
@@ -578,6 +580,7 @@ func (c *Configuration) Save() error {
 		nfs := *c.Notifications
 		for i, cn := range nfs {
 			cn.APIHost = cn.cfgAPIHost
+			cn.APIToken = cn.cfgAPIToken
 			cn.Login = cn.cfgLogin
 			cn.Password = cn.cfgPassword
 			cn.SenderAddress = cn.cfgSenderAddress
@@ -959,12 +962,14 @@ func interpolateOAuth(oa *OAuthProviderInfo) {
 
 func interpolateNotifications(cn *NotificationInfo) {
 	cn.cfgAPIHost = cn.APIHost
+	cn.cfgAPIToken = cn.APIToken
 	cn.cfgLogin = cn.Login
 	cn.cfgPassword = cn.Password
 	cn.cfgSenderAddress = cn.SenderAddress
 	cn.cfgReplyTo = cn.ReplyTo
 
 	cn.APIHost = interpolateEnvVars(cn.cfgAPIHost)
+	cn.APIToken = interpolateEnvVars(cn.cfgAPIToken)
 	cn.Login = interpolateEnvVars(cn.cfgLogin)
 	cn.Password = interpolateEnvVars(cn.cfgPassword)
 	cn.SenderAddress = interpolateEnvVars(cn.cfgSenderAddress)
