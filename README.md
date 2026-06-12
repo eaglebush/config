@@ -11,6 +11,7 @@
   - Databases
   - API Endpoints
   - OAuth Providers
+  - Defaults
   - Directories
   - Notifications
   - Caching
@@ -26,6 +27,8 @@
 - 🧩 Built-in defaults for common configuration values (e.g., IDs, cookie domain, secrets)
 
 ---
+
+>⚠️ **Note:** `JWTSecret` and `LicenseID` fields has been removed from this library
 
 ## 📥 Installation
 
@@ -76,12 +79,12 @@ You can use `${VAR_NAME}` placeholders in your configuration file:
 
 ```json
 {
-	"Databases": [
-		{
-			"ID": "main",
-			"ConnectionString": "Server=${DB_HOST};User Id=${DB_USER};Password=${DB_PASS};"
-		}
-	]
+    "Databases": [
+        {
+            "ID": "main",
+            "ConnectionString": "Server=${DB_HOST};User Id=${DB_USER};Password=${DB_PASS};"
+        }
+    ]
 }
 ```
 
@@ -100,7 +103,7 @@ export DB_PASS=secret
 ```go
 err := conf.Save()
 if err != nil {
-	log.Println("Save failed:", err)
+    log.Println("Save failed:", err)
 }
 ```
 
@@ -131,6 +134,7 @@ The `Configuration` struct exposes various helper methods:
 | `GetDatabaseInfoGroup(groupId string)` | Get databases by group |
 | `GetEndpointInfo(id string)` | Get API endpoint by ID (uses default if empty) |
 | `GetEndpointInfoGroup(groupId string)` | Get endpoints by group |
+| `GetDefault(topic string)` | Get a default by topic |
 | `GetDirectory(groupId string)` | Get directory by group ID |
 | `GetDirectoryItem(groupId, key string)` | Get specific directory item |
 | `GetDomainInfo(name string)` | Get domain info |
@@ -165,8 +169,10 @@ The following fields support `${ENV}` placeholders:
 - `DatabaseInfo.ConnectionString`
 - `EndpointInfo.Address`, `APIKey`, `Token`
 - `OAuthProviderInfo.IconUrl`, `ProviderHost`, `ProviderWebUri`, `ProviderApiUri`
-- `NotificationInfo.APIHost`, `Login`, `Password`, `SenderAddress`, `ReplyTo`
+- `NotificationInfo.APIHost`, `APIToken`, `Login`, `Password`, `SenderAddress`, `ReplyTo`
 - `CacheInfo.Address`, `Password`
+- `SecretInfo.Value`
+
 
 Values are interpolated **once on load**, and then **restored to original values** before saving.
 
@@ -191,24 +197,24 @@ Values are interpolated **once on load**, and then **restored to original values
 
 ```go
 type Configuration struct {
-	ApplicationID         *string
-	ApplicationName       *string
-	Databases             *[]DatabaseInfo
-	APIEndpoints          *[]EndpointInfo
-	Notifications         *[]NotificationInfo
-	OAuths                *[]OAuthProviderInfo
-	Directories           *[]DirectoryInfo
-	Flags                 *[]Flag
-	FlagGroups            *[]FlagGroup
-	Cache                 *CacheInfo
-	Secrets               *[]SecretInfo
-	Sources               *[]SourceInfo
-	Queue                 *QueueInfo
-	CookieDomain          *string
-	JWTSecret             *string
-	Secure                *bool
-	ReadTimeout           *int
-	WriteTimeout          *int
+    ApplicationID         *string
+    ApplicationName       *string
+    Defaults              []DefaultInfo
+    Databases             *[]DatabaseInfo
+    APIEndpoints          *[]EndpointInfo
+    Notifications         *[]NotificationInfo
+    OAuths                *[]OAuthProviderInfo
+    Directories           *[]DirectoryInfo
+    Flags                 *[]Flag
+    FlagGroups            *[]FlagGroup
+    Cache                 *CacheInfo
+    Secrets               *[]SecretInfo
+    Sources               *[]SourceInfo
+    Queue                 *QueueInfo
+    CookieDomain          *string
+    Secure                *bool
+    ReadTimeout           *int
+    WriteTimeout          *int
 }
 ```
 
@@ -222,6 +228,18 @@ type Configuration struct {
 - `QueueInfo` — queue/streaming configuration.
 - `SecretInfo` — grouped secrets for secure data.
 - `DirectoryInfo` — configuration for grouped flags.
+- `DefaultInfo` - contains the defaults for some configuration infos.
+
+### DefaultInfo Constants
+
+The supported DefaultInfo topic constants are the following: `DATABASE`, `NOTIFICATION`, `QUEUE`, `ENDPOINT`, `SECRET`. All topics are initially set to `"DEFAULT"` as the initial value. These values can be replaced by setting the values in the configuration values like:
+
+```json
+"Defaults": [
+    {"Topic": "DATABASE", "Value": "${APPCORE_DB_ID}"	}
+],
+```
+As you can see, the value can be an environment variable, or a plain value.
 
 ---
 
@@ -229,24 +247,24 @@ type Configuration struct {
 
 ```json
 {
-	"ApplicationName": "MyApp",
-	"Databases": [
-		{
-			"ID": "main",
-			"DriverName": "sqlserver",
-			"ConnectionString": "Server=${DB_HOST};User Id=${DB_USER};Password=${DB_PASS};"
-		}
-	],
-	"APIEndpoints": [
-		{
-			"ID": "DEFAULT",
-			"Name": "Main API",
-			"Address": "https://api.example.com"
-		}
-	],
-	"Flags": [
-		{ "Key": "TIMEOUT", "Value": "30" }
-	]
+    "ApplicationName": "MyApp",
+    "Databases": [
+        {
+           "ID": "main",
+           "DriverName": "sqlserver",
+           "ConnectionString": "Server=${DB_HOST};User Id=${DB_USER};Password=${DB_PASS};"
+        }
+    ],
+    "APIEndpoints": [
+        {
+            "ID": "DEFAULT",
+            "Name": "Main API",
+            "Address": "https://api.example.com"
+        }
+    ],
+    "Flags": [
+        { "Key": "TIMEOUT", "Value": "30" }
+    ]
 }
 ```
 
@@ -259,7 +277,6 @@ When a configuration is loaded, default values are applied where missing:
 | Field | Default Value |
 |--------|----------------|
 | `CookieDomain` | `localhost` |
-| `JWTSecret` | `defaultsecretkey` |
 | `DatabaseInfo.StorageType` | `SERVER` |
 | `DatabaseInfo.InterpolateTables` | `true` |
 | `DatabaseInfo.StringEnclosingChar` | `'` |

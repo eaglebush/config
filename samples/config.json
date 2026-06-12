@@ -33,47 +33,36 @@
 	"ApplicationID": "Default",
 	"ApplicationName": "Default Application",
 	"ApplicationTheme": "default",
-	"DefaultDatabaseID": "DEFAULT",
-	"DefaultEndpointID": "DEFAULT",
-	"DefaultNotificationID": "DEFAULT",
 	"HostPort": 8000,
 	"ReadTimeout": 30,
 	"WriteTimeout": 30,
-	"JWTSecret": "thisisanhmacsecretkey",
-	"LicenseSerial": "12345678",
 	"Secure": false,
-	"ID": "Test",
-	"Name" : "Test Name",
 	"Databases": [
 		{
 			"ID": "DEFAULT",
+			"GroupID": "PICKLISTDEST",
 			"ConnectionString": "sqlserver://admin:fantastic4@192.168.1.19?database=APPSDB\u0026connection+timeout=0\u0026encrypt=disable",
 			"Schema":"",
 			"DriverName": "mssql",
 			"StorageType": "SERVER",
 			"ParameterPlaceholder": "?",
 			"ParameterInSequence": false,
-			"GroupID": "PICKLISTDEST",
 			"SequenceGenerator": {
 				"UpsertQuery": "",
 				"ResultQuery": "DECLARE @surrogatekey INT; EXEC dbo.spGetNextSurrogateKey '{SequenceName}', @surrogatekey OUTPUT; SELECT @surrogatekey;",
 				"NamePlaceHolder": "{SequenceName}"
 			},
-			"IdentityQuery": "SELECT SCOPE_IDENTITY();",
-			"DateFunction": "",
-			"UTCDateFunction": "",
 			"MaxOpenConnection": 0,
 			"MaxIdleConnection": 0,
 			"MaxConnectionLifetime": 0,
 			"Ping": false,
 			"StringEnclosingChar": "'",
 			"StringEscapeChar": "'",
-			"ReservedWordEscapeChar":"[]",
-			"KeywordMap": [
-				{ "Key": "SAVEPOINT_START", "Value": "SAVE TRANSACTION"	},
-				{ "Key": "SAVEPOINT_RELEASE", "Value": "ROLLBACK TRANSACTION" }
-			]
+			"ReservedWordEscapeChar":"[]"
 		}
+	],
+	"Defaults": [
+		{"Topic": "DATABASE", "Value": "${APPCORE_DB_ID}"	}
 	],
 	"Directories": [
 		{

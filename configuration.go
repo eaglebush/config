@@ -11,7 +11,28 @@ import (
 	"strings"
 )
 
+// Default topics constrant
+const (
+	DEFAULT_DATABASE_ID     DefaultTopic = "DATABASE"
+	DEFAULT_NOTIFICATION_ID DefaultTopic = "NOTIFICATION"
+	DEFAULT_QUEUE_ID        DefaultTopic = "QUEUE"
+	DEFAULT_ENDPOINT_ID     DefaultTopic = "ENDPOINT"
+	DEFAULT_SECRET_ID       DefaultTopic = "SECRET"
+)
+
 type (
+	DefaultTopic string
+	// DefaultInfo
+	DefaultInfo struct {
+		// Configuration topic. Valid configuration topic are DATABASE, NOTIFICATION, QUEUE, ENDPOINT
+		Topic DefaultTopic
+
+		// Usually the ID of the default topic. Should be set via environment variable
+		Value string
+
+		cfgValue string
+	}
+
 	// DirectoryInfo contains a directory info configuration
 	DirectoryInfo struct {
 		GroupID     string // Group id of the directory
@@ -201,6 +222,9 @@ type (
 		// Configured databases for this application use
 		Databases *[]DatabaseInfo
 
+		// Defaults stores the preferred configuration ids to use
+		Defaults []DefaultInfo
+
 		// Configured directory for this application use
 		Directories *[]DirectoryInfo
 
@@ -224,14 +248,6 @@ type (
 
 		// The network port for the application
 		HostPort *int
-
-		// Application wide JSON Web Token (JT) secret
-		//
-		// Deprecated: Use Secrets instead
-		JWTSecret *string
-
-		// License serial of this application
-		LicenseSerial *string
 
 		// Configured notifications for this application use
 		Notifications *[]NotificationInfo
@@ -268,11 +284,21 @@ var (
 )
 
 var envPattern = regexp.MustCompile(`\$\{[A-Z0-9_]+\}`)
+var initDefaults = []DefaultInfo{
+	{Topic: DEFAULT_DATABASE_ID, Value: def},
+	{Topic: DEFAULT_NOTIFICATION_ID, Value: def},
+	{Topic: DEFAULT_QUEUE_ID, Value: def},
+	{Topic: DEFAULT_ENDPOINT_ID, Value: def},
+	{Topic: DEFAULT_SECRET_ID, Value: def},
+}
 
 const def string = `DEFAULT`
 
 func load(source string) (*Configuration, error) {
-	config := &Configuration{}
+	config := &Configuration{
+		Defaults: initDefaults,
+	}
+
 	if !(strings.HasPrefix(source, `http://`) || strings.HasPrefix(source, `https://`)) {
 		config.local = true
 	}
@@ -314,9 +340,7 @@ func load(source string) (*Configuration, error) {
 	if config.CookieDomain == nil {
 		config.CookieDomain = newString(`localhost`)
 	}
-	if config.JWTSecret == nil {
-		config.JWTSecret = newString(`defaultsecretkey`)
-	}
+
 	// Default setting for database
 	if config.Databases != nil {
 		dbs := *config.Databases
@@ -412,6 +436,26 @@ func load(source string) (*Configuration, error) {
 			scts[i] = sct
 		}
 		config.Secrets = &scts
+	}
+
+	// Load configuration defaults
+	defs := config.Defaults
+	for i, df := range defs {
+		df.cfgValue = df.Value
+		df.Value = interpolateEnvVars(df.cfgValue)
+		defs[i] = df
+	}
+	config.Defaults = defs
+
+	// Loaded defaults may not be complete of defaults
+	// So, we need to update the initial defaults values
+	for i, inDef := range initDefaults {
+		for _, df := range defs {
+			if !strings.EqualFold(string(inDef.Topic), string(df.Topic)) {
+				continue
+			}
+			initDefaults[i].Value = df.Value
+		}
 	}
 
 	config.FileName = source
@@ -603,6 +647,12 @@ func (c *Configuration) Save() error {
 		}
 		c.Secrets = &scts
 	}
+	defs := c.Defaults
+	for i, df := range defs {
+		df.Value = df.cfgValue
+		defs[i] = df
+	}
+	c.Defaults = defs
 
 	b, err := json.MarshalIndent(c, "", "\t")
 	if err != nil {
@@ -699,8 +749,6 @@ func (c *Configuration) Reload() error {
 	c.Databases = newConfig.Databases
 	c.Directories = newConfig.Directories
 	c.Flags = newConfig.Flags
-	c.JWTSecret = newConfig.JWTSecret
-	c.LicenseSerial = newConfig.LicenseSerial
 	c.Notifications = newConfig.Notifications
 	c.OAuths = newConfig.OAuths
 	c.Queue = newConfig.Queue
@@ -724,20 +772,25 @@ func (c *Configuration) Flag(key string) Flag {
 	if c.Flags == nil {
 		return ret
 	}
-	// get flags to loop from
-	// also loop from variations
-	// of convention, like underscore
-	// and dash
+
+	// Get value from flags
 	for _, f := range *c.Flags {
-		for _, v := range []string{"_", "-"} {
-			ki := strings.ReplaceAll(f.Key, v, "")
-			if strings.EqualFold(key, ki) {
-				return f
-			}
+		if strings.EqualFold(f.Key, key) {
+			return f
 		}
 	}
 
 	return ret
+}
+
+// GetDefault returns the default value by topic
+func (c *Configuration) GetDefault(topic DefaultTopic) string {
+	for _, df := range initDefaults {
+		if df.Topic == topic {
+			return df.Value
+		}
+	}
+	return ""
 }
 
 // GetFlag retrieves a flag value and return it converted to type indicated
@@ -783,10 +836,10 @@ func GetFlag[T FlagTypes](flgs *[]Flag, key string) T {
 	return zero
 }
 
-// normalizeFieldName normalizes a field name for lookup:
+// normalizeKey normalizes a field name for lookup:
 // - lowercases
 // - removes spaces, underscores, and dashes
-func normalizeFieldName(name string) string {
+func normalizeKey(name string) string {
 	name = strings.ToLower(name)
 	name = strings.TrimSpace(name)
 	name = strings.ReplaceAll(name, " ", "")
@@ -803,7 +856,7 @@ func GetField[T any](config *Configuration, fieldName string) T {
 	}
 
 	var v any
-	switch normalizeFieldName(fieldName) {
+	switch normalizeKey(fieldName) {
 	case "apiendpoints":
 		v = config.APIEndpoints
 	case "applicationid":
@@ -838,8 +891,6 @@ func GetField[T any](config *Configuration, fieldName string) T {
 		v = config.HostExternalURL
 	case "hostport":
 		v = config.HostPort
-	case "licenseserial":
-		v = config.LicenseSerial
 	case "notifications":
 		v = config.Notifications
 	case "oauths":

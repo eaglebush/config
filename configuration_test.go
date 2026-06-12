@@ -13,26 +13,27 @@ type EmbeddedConfiguration struct {
 }
 
 func TestLoadConfig(t *testing.T) {
-	config, err := Load("samples/config.mssql.json")
+	config, err := Load("samples/config.json")
 	if err != nil {
 		t.Fail()
 		t.Fatalf(`Error %v`, err)
 	}
 
-	v := config.GetDatabaseInfo("DEFAULT")
+	ddf := config.GetDefault("DATABASE")
+	v := config.GetDatabaseInfo(ddf)
+	if v != nil {
+		fmt.Println(`Parameter PlaceHolder: `, v.ParameterPlaceholder)
+	}
 
 	vi := config.Flag("Joan").String()
 	fmt.Println(vi)
-
-	fmt.Println(`Parameter PlaceHolder: `, v.ParameterPlaceholder)
 
 	b, _ := json.MarshalIndent(config, "", "\t")
 
 	fmt.Printf("%v+", string(b))
 
-	config.LicenseSerial = newString("12345678")
-
-	apiInfo := config.GetEndpointInfo("DEFAULT")
+	dei := config.GetDefault("ENDPOINT")
+	apiInfo := config.GetEndpointInfo(dei)
 	_ = apiInfo
 
 	// ok := config.Save()
@@ -55,8 +56,6 @@ func TestLoadURLConfig(t *testing.T) {
 	b, _ := json.MarshalIndent(config, "", "\t")
 
 	fmt.Printf("%v+", string(b))
-
-	config.LicenseSerial = newString("12345678")
 
 	// ok := config.Save()
 	// if !ok {
