@@ -784,13 +784,15 @@ func (c *Configuration) Flag(key string) Flag {
 }
 
 // GetDefault returns the default value by topic
+//
+// Returns "DEFAULT" if the value found is empty.
 func (c *Configuration) GetDefault(topic DefaultTopic) string {
 	for _, df := range initDefaults {
-		if df.Topic == topic {
+		if df.Topic == topic && df.Value != "" {
 			return df.Value
 		}
 	}
-	return ""
+	return def
 }
 
 // GetFlag retrieves a flag value and return it converted to type indicated
