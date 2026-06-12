@@ -28,7 +28,8 @@
 
 ---
 
->⚠️ **Note:** `JWTSecret` and `LicenseID` fields has been removed from this library
+>⚠️ **Note:**
+`JWTSecret` and `LicenseSerial` fields has been removed from this library. These are recommended to be set in the `Secrets` field.
 
 ## 📥 Installation
 
@@ -118,7 +119,7 @@ Reload the configuration from the original source without restarting:
 ```go
 err := conf.Reload()
 if err != nil {
-	log.Println("Reload failed:", err)
+    log.Println("Reload failed:", err)
 }
 ```
 
