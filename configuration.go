@@ -174,7 +174,7 @@ type (
 		GroupID *string // GroupID allows to get secrets in group
 		ID      string  // ID of the secret
 		Name    string  // Name of the secret
-		Value   string  // Value of the secret
+		Value   string  // Value of the secret. Can be set via environment variable
 
 		cfgValue string
 	}
